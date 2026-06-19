@@ -44,8 +44,26 @@ const Home = () => {
       ctx.scale(dpr, dpr);
     }
     
-    // Draw the frame covering the full canvas (like object-fit: cover)
-    const scale = Math.max(displayWidth / bitmap.width, displayHeight / bitmap.height);
+    // ====================================================================
+    // HOW TO CHANGE THE ANIMATION SIZE (TUTORIAL FOR YOU):
+    // 
+    // displayWidth / bitmap.width = the scale needed to fit horizontally
+    // displayHeight / bitmap.height = the scale needed to fit vertically
+    //
+    // If you use Math.max() -> It ZOOMs IN to fill the whole screen (crops edges).
+    // If you use Math.min() -> It ZOOMs OUT to fit everything (leaves black bars).
+    // ====================================================================
+    
+    let scale;
+    if (displayWidth < 768) {
+      // ON MOBILE: Use Math.min to fit the whole lightbulb without cropping
+      // I multiplied by 1.2 to make it a tiny bit bigger than strictly "fit"
+      scale = Math.min(displayWidth / bitmap.width, displayHeight / bitmap.height) * 1.2;
+    } else {
+      // ON DESKTOP: Use Math.max to cover the entire screen
+      scale = Math.max(displayWidth / bitmap.width, displayHeight / bitmap.height);
+    }
+
     const x = (displayWidth - bitmap.width * scale) / 2;
     const y = (displayHeight - bitmap.height * scale) / 2;
     
@@ -262,9 +280,10 @@ const Home = () => {
         <img 
           src="/lightbulb.webp" 
           alt="" 
+          className="hero-fallback-image"
           style={{ 
             position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-            objectFit: 'cover', zIndex: 0,
+            zIndex: 0,
             // Hide once canvas is ready
             opacity: framesReady ? 0 : 1,
             transition: 'opacity 0.3s ease'

@@ -248,6 +248,10 @@ a {
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
+.hero-fallback-image {
+  object-fit: cover;
+}
+
 .hero-overlay {
   position: absolute;
   top: 0;
@@ -581,6 +585,11 @@ textarea.form-input {
   }
   .image-banner-content p {
     font-size: 0.9rem;
+  }
+
+  .hero-fallback-image {
+    object-fit: contain;
+    transform: scale(1.2);
   }
 
   .section {
