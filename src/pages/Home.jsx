@@ -3,133 +3,21 @@ import { Link, useLocation } from 'react-router-dom';
 import { Shield, Zap, Wrench, CheckCircle, Clock, Award, Star, Heart, ArrowRight } from 'lucide-react';
 
 const Home = () => {
-  const canvasRef = useRef(null);
   const containerRef = useRef(null);
+  const videoRef = useRef(null);
   const location = useLocation();
   
   const [isAnimFinished, setIsAnimFinished] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [framesReady, setFramesReady] = useState(false);
 
   // Refs for ultra-smooth lerping
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
   const animationFrameId = useRef(null);
-  const framesRef = useRef([]); 
-  const frameCountRef = useRef(0);
   const lastTouchY = useRef(0);
-
-  // Draw a specific frame index to the canvas
-  const drawFrame = useCallback((frameIndex) => {
-    const canvas = canvasRef.current;
-    const frames = framesRef.current;
-    if (!canvas || !frames.length) return;
-    
-    const idx = Math.max(0, Math.min(frames.length - 1, Math.round(frameIndex)));
-    const bitmap = frames[idx];
-    if (!bitmap) return;
-    
-    const ctx = canvas.getContext('2d');
-    
-    // Match canvas to actual pixel dimensions for crisp rendering
-    const dpr = window.devicePixelRatio || 1;
-    const displayWidth = window.innerWidth;
-    const displayHeight = window.innerHeight;
-    
-    if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
-      canvas.width = displayWidth * dpr;
-      canvas.height = displayHeight * dpr;
-      canvas.style.width = displayWidth + 'px';
-      canvas.style.height = displayHeight + 'px';
-      ctx.scale(dpr, dpr);
-    }
-    
-    // ====================================================================
-    // HOW TO CHANGE THE ANIMATION SIZE (TUTORIAL FOR YOU):
-    // 
-    // displayWidth / bitmap.width = the scale needed to fit horizontally
-    // displayHeight / bitmap.height = the scale needed to fit vertically
-    //
-    // If you use Math.max() -> It ZOOMs IN to fill the whole screen (crops edges).
-    // If you use Math.min() -> It ZOOMs OUT to fit everything (leaves black bars).
-    // ====================================================================
-    
-    let scale;
-    if (displayWidth < 768) {
-      // ON MOBILE: Use Math.min to fit the whole lightbulb without cropping
-      // I multiplied by 1.2 to make it a tiny bit bigger than strictly "fit"
-      scale = Math.min(displayWidth / bitmap.width, displayHeight / bitmap.height) * 1.2;
-    } else {
-      // ON DESKTOP: Use Math.max to cover the entire screen
-      scale = Math.max(displayWidth / bitmap.width, displayHeight / bitmap.height);
-    }
-
-    const x = (displayWidth - bitmap.width * scale) / 2;
-    const y = (displayHeight - bitmap.height * scale) / 2;
-    
-    ctx.clearRect(0, 0, displayWidth, displayHeight);
-    ctx.drawImage(bitmap, x, y, bitmap.width * scale, bitmap.height * scale);
-  }, []);
-
-  // ===== EXTRACT FRAMES FROM ANIMATED WEBP =====
-  useEffect(() => {
-    let cancelled = false;
-
-    // If frames already extracted, don't re-extract
-    if (framesRef.current.length > 0) {
-      setFramesReady(true);
-      drawFrame(0);
-      return;
-    }
-
-    const extractFrames = async () => {
-      try {
-        const response = await fetch('/lightbulb.webp');
-        const blob = await response.blob();
-        const arrayBuffer = await blob.arrayBuffer();
-        
-        const decoder = new ImageDecoder({
-          type: 'image/webp',
-          data: arrayBuffer,
-        });
-
-        await decoder.tracks.ready;
-        const totalFrames = decoder.tracks.selectedTrack.frameCount;
-        frameCountRef.current = totalFrames;
-
-        const extractedFrames = [];
-        
-        for (let i = 0; i < totalFrames; i++) {
-          if (cancelled) return;
-          const result = await decoder.decode({ frameIndex: i });
-          const bitmap = await createImageBitmap(result.image);
-          extractedFrames.push(bitmap);
-          result.image.close();
-          
-          // Draw frame 0 as soon as it's extracted so the screen isn't black
-          if (i === 0 && !cancelled) {
-            framesRef.current = extractedFrames;
-            drawFrame(0);
-          }
-        }
-        
-        framesRef.current = extractedFrames;
-        
-        if (!cancelled) {
-          setFramesReady(true);
-          drawFrame(0);
-        }
-        
-        decoder.close();
-      } catch (err) {
-        console.error('Frame extraction failed:', err);
-      }
-    };
-
-    extractFrames();
-    
-    return () => { cancelled = true; };
-  }, []); // Only run once on mount
+  
+  // Track video duration
+  const [videoDuration, setVideoDuration] = useState(0);
 
   // CRITICAL: Reset animation state when Home/Logo is clicked
   useEffect(() => {
@@ -140,15 +28,14 @@ const Home = () => {
     targetProgress.current = 0;
     currentProgress.current = 0;
     
-    // Draw first frame immediately if frames already extracted
-    if (framesRef.current.length > 0) {
-      drawFrame(0);
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
     }
 
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [location.state, drawFrame]);
+  }, [location.state]);
 
   // Lock/unlock body
   useEffect(() => {
@@ -157,7 +44,6 @@ const Home = () => {
 
   // Main animation engine
   useEffect(() => {
-    // Mouse wheel handler
     const handleWheel = (e) => {
       if (isAnimFinished) return;
       const maxDelta = 80;
@@ -166,7 +52,6 @@ const Home = () => {
       targetProgress.current = Math.max(0, Math.min(1.05, targetProgress.current + scrollAmount));
     };
 
-    // Touch handlers for mobile
     const handleTouchStart = (e) => {
       if (isAnimFinished) return;
       lastTouchY.current = e.touches[0].clientY;
@@ -174,9 +59,9 @@ const Home = () => {
 
     const handleTouchMove = (e) => {
       if (isAnimFinished) return;
-      e.preventDefault(); // Prevent native scroll while locked
+      e.preventDefault(); 
       const currentTouchY = e.touches[0].clientY;
-      const deltaY = lastTouchY.current - currentTouchY; // positive = scroll down
+      const deltaY = lastTouchY.current - currentTouchY; 
       lastTouchY.current = currentTouchY;
       
       const maxDelta = 40;
@@ -189,7 +74,6 @@ const Home = () => {
     window.addEventListener('touchstart', handleTouchStart, { passive: true });
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
 
-    // Smooth update loop
     const smoothUpdate = () => {
       if (!isAnimFinished) {
         currentProgress.current += (targetProgress.current - currentProgress.current) * 0.03;
@@ -201,10 +85,14 @@ const Home = () => {
            return prev;
         });
 
-        // Draw the correct frame
-        if (framesRef.current.length > 0 && frameCountRef.current > 0) {
-          const frameIndex = Math.round(renderProgress * (frameCountRef.current - 1));
-          drawFrame(frameIndex);
+        // Update video current time
+        if (videoRef.current && videoDuration > 0) {
+          // ensure we don't exceed video duration
+          const targetTime = renderProgress * videoDuration;
+          // Only update if time difference is meaningful to prevent choppiness
+          if (Math.abs(videoRef.current.currentTime - targetTime) > 0.01) {
+             videoRef.current.currentTime = targetTime;
+          }
         }
 
         if (currentProgress.current >= 0.99 && targetProgress.current >= 1.0) {
@@ -222,7 +110,7 @@ const Home = () => {
       window.removeEventListener('touchmove', handleTouchMove);
       if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     };
-  }, [isAnimFinished, drawFrame]);
+  }, [isAnimFinished, videoDuration]);
 
   // Handle scrolling back UP to the top — relock
   useEffect(() => {
@@ -237,19 +125,6 @@ const Home = () => {
     window.addEventListener('scroll', handleGlobalScroll);
     return () => window.removeEventListener('scroll', handleGlobalScroll);
   }, [isAnimFinished]);
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (framesRef.current.length > 0) {
-        const frameIndex = Math.round(currentProgress.current * (frameCountRef.current - 1));
-        drawFrame(frameIndex);
-      }
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [drawFrame]);
-
 
   // Phase calculator for text transitions
   const calculatePhase = (start, end) => {
@@ -276,26 +151,18 @@ const Home = () => {
       {/* ===== SCROLL-LOCKED FRAME-BY-FRAME HERO ===== */}
       <section ref={containerRef} style={{ position: 'relative', height: '100vh', overflow: 'hidden', backgroundColor: '#000' }}>
         
-        {/* Static fallback image — visible instantly while frames extract */}
-        <img 
-          src="/lightbulb.webp" 
-          alt="" 
+        {/* Scroll-scrubbed video */}
+        <video 
+          ref={videoRef}
+          src="/Lever_flipping,_LED_bulb_glowing_202606191155.mp4" 
           className="hero-fallback-image"
+          muted 
+          playsInline
+          preload="auto"
+          onLoadedMetadata={(e) => setVideoDuration(e.target.duration)}
           style={{ 
             position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-            zIndex: 0,
-            // Hide once canvas is ready
-            opacity: framesReady ? 0 : 1,
-            transition: 'opacity 0.3s ease'
-          }} 
-        />
-
-        {/* Canvas renders individual WebP frames based on scroll */}
-        <canvas 
-          ref={canvasRef} 
-          style={{ 
-            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-            display: 'block', zIndex: 1
+            zIndex: 1, display: 'block'
           }} 
         />
         
