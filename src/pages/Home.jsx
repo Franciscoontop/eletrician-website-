@@ -271,18 +271,22 @@ const Home = () => {
       {/* ===== SCROLL-LOCKED FRAME-BY-FRAME HERO ===== */}
       <section ref={containerRef} style={{ position: 'relative', height: '100vh', overflow: 'hidden', backgroundColor: '#000' }}>
         
-        {/* Loading indicator while extracting frames */}
-        {!framesReady && (
-           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, color: 'var(--accent-amber)', fontFamily: 'var(--font-heading)' }}>
-             Loading High-Res Animation... {extractionProgress}%
-           </div>
-        )}
+        {/* Static fallback image — visible instantly, fades out once high-res canvas is ready */}
+        <img 
+          src="/lightbulb.webp" 
+          alt="" 
+          className="hero-fallback-image"
+          style={{ 
+            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+            zIndex: 0, opacity: framesReady ? 0 : 1, transition: 'opacity 0.5s ease'
+          }} 
+        />
 
         <canvas 
           ref={canvasRef} 
           style={{ 
             position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-            display: 'block', zIndex: 1
+            display: 'block', zIndex: 1, opacity: framesReady ? 1 : 0, transition: 'opacity 0.5s ease'
           }} 
         />
         
