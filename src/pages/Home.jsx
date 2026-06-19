@@ -3,21 +3,133 @@ import { Link, useLocation } from 'react-router-dom';
 import { Shield, Zap, Wrench, CheckCircle, Clock, Award, Star, Heart, ArrowRight } from 'lucide-react';
 
 const Home = () => {
+  const canvasRef = useRef(null);
   const containerRef = useRef(null);
-  const videoRef = useRef(null);
   const location = useLocation();
   
   const [isAnimFinished, setIsAnimFinished] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [framesReady, setFramesReady] = useState(false);
+  const [extractionProgress, setExtractionProgress] = useState(0);
 
   // Refs for ultra-smooth lerping
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
   const animationFrameId = useRef(null);
+  const framesRef = useRef([]); 
+  const frameCountRef = useRef(0);
   const lastTouchY = useRef(0);
-  
-  // Track video duration
-  const [videoDuration, setVideoDuration] = useState(0);
+
+  // Draw a specific frame index to the canvas
+  const drawFrame = useCallback((frameIndex) => {
+    const canvas = canvasRef.current;
+    const frames = framesRef.current;
+    if (!canvas || !frames.length) return;
+    
+    const idx = Math.max(0, Math.min(frames.length - 1, Math.round(frameIndex)));
+    const bitmap = frames[idx];
+    if (!bitmap) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    const dpr = window.devicePixelRatio || 1;
+    const displayWidth = window.innerWidth;
+    const displayHeight = window.innerHeight;
+    
+    if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
+      canvas.width = displayWidth * dpr;
+      canvas.height = displayHeight * dpr;
+      canvas.style.width = displayWidth + 'px';
+      canvas.style.height = displayHeight + 'px';
+      ctx.scale(dpr, dpr);
+    }
+    
+    let scale;
+    if (displayWidth < 768) {
+      scale = Math.min(displayWidth / bitmap.width, displayHeight / bitmap.height) * 1.2;
+    } else {
+      scale = Math.max(displayWidth / bitmap.width, displayHeight / bitmap.height);
+    }
+
+    const x = (displayWidth - bitmap.width * scale) / 2;
+    const y = (displayHeight - bitmap.height * scale) / 2;
+    
+    ctx.clearRect(0, 0, displayWidth, displayHeight);
+    ctx.drawImage(bitmap, x, y, bitmap.width * scale, bitmap.height * scale);
+  }, []);
+
+  // ===== EXTRACT MP4 FRAMES INTO MEMORY FOR BUTTERY SMOOTH SCRUBBING =====
+  useEffect(() => {
+    let cancelled = false;
+
+    if (framesRef.current.length > 0) {
+      setFramesReady(true);
+      drawFrame(0);
+      return;
+    }
+
+    const extractFramesFromMP4 = async () => {
+      try {
+        const video = document.createElement('video');
+        video.src = '/Lever_flipping,_LED_bulb_glowing_202606191155.mp4';
+        video.muted = true;
+        video.playsInline = true;
+        video.crossOrigin = 'anonymous';
+
+        await new Promise((resolve) => {
+          video.addEventListener('loadeddata', resolve, { once: true });
+        });
+
+        // Use 24 frames per second to balance smoothness and memory/extraction speed
+        const fps = 24;
+        const duration = video.duration;
+        const totalFrames = Math.ceil(duration * fps);
+        frameCountRef.current = totalFrames;
+        
+        const frames = [];
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        let currentFrame = 0;
+
+        const captureFrame = async () => {
+          if (cancelled) return;
+          
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const bitmap = await createImageBitmap(canvas);
+          frames.push(bitmap);
+          
+          setExtractionProgress(Math.round((currentFrame / totalFrames) * 100));
+
+          if (currentFrame === 0) {
+             framesRef.current = frames;
+             drawFrame(0);
+          }
+
+          currentFrame++;
+          if (currentFrame < totalFrames) {
+            video.currentTime = currentFrame / fps;
+          } else {
+            framesRef.current = frames;
+            setFramesReady(true);
+            drawFrame(0);
+          }
+        };
+
+        video.addEventListener('seeked', captureFrame);
+        video.currentTime = 0; // trigger first capture
+
+      } catch (err) {
+        console.error('Video frame extraction failed:', err);
+      }
+    };
+
+    extractFramesFromMP4();
+    
+    return () => { cancelled = true; };
+  }, [drawFrame]);
 
   // CRITICAL: Reset animation state when Home/Logo is clicked
   useEffect(() => {
@@ -28,14 +140,14 @@ const Home = () => {
     targetProgress.current = 0;
     currentProgress.current = 0;
     
-    if (videoRef.current) {
-      videoRef.current.currentTime = 0;
+    if (framesRef.current.length > 0) {
+      drawFrame(0);
     }
 
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [location.state]);
+  }, [location.state, drawFrame]);
 
   // Lock/unlock body
   useEffect(() => {
@@ -85,14 +197,10 @@ const Home = () => {
            return prev;
         });
 
-        // Update video current time
-        if (videoRef.current && videoDuration > 0) {
-          // ensure we don't exceed video duration
-          const targetTime = renderProgress * videoDuration;
-          // Only update if time difference is meaningful to prevent choppiness
-          if (Math.abs(videoRef.current.currentTime - targetTime) > 0.01) {
-             videoRef.current.currentTime = targetTime;
-          }
+        // Draw the correct frame from memory cache
+        if (framesRef.current.length > 0 && frameCountRef.current > 0) {
+          const frameIndex = Math.round(renderProgress * (frameCountRef.current - 1));
+          drawFrame(frameIndex);
         }
 
         if (currentProgress.current >= 0.99 && targetProgress.current >= 1.0) {
@@ -110,7 +218,7 @@ const Home = () => {
       window.removeEventListener('touchmove', handleTouchMove);
       if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     };
-  }, [isAnimFinished, videoDuration]);
+  }, [isAnimFinished, drawFrame]);
 
   // Handle scrolling back UP to the top — relock
   useEffect(() => {
@@ -125,6 +233,18 @@ const Home = () => {
     window.addEventListener('scroll', handleGlobalScroll);
     return () => window.removeEventListener('scroll', handleGlobalScroll);
   }, [isAnimFinished]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (framesRef.current.length > 0) {
+        const frameIndex = Math.round(currentProgress.current * (frameCountRef.current - 1));
+        drawFrame(frameIndex);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [drawFrame]);
 
   // Phase calculator for text transitions
   const calculatePhase = (start, end) => {
@@ -151,18 +271,18 @@ const Home = () => {
       {/* ===== SCROLL-LOCKED FRAME-BY-FRAME HERO ===== */}
       <section ref={containerRef} style={{ position: 'relative', height: '100vh', overflow: 'hidden', backgroundColor: '#000' }}>
         
-        {/* Scroll-scrubbed video */}
-        <video 
-          ref={videoRef}
-          src="/Lever_flipping,_LED_bulb_glowing_202606191155.mp4" 
-          className="hero-fallback-image"
-          muted 
-          playsInline
-          preload="auto"
-          onLoadedMetadata={(e) => setVideoDuration(e.target.duration)}
+        {/* Loading indicator while extracting frames */}
+        {!framesReady && (
+           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 10, color: 'var(--accent-amber)', fontFamily: 'var(--font-heading)' }}>
+             Loading High-Res Animation... {extractionProgress}%
+           </div>
+        )}
+
+        <canvas 
+          ref={canvasRef} 
           style={{ 
             position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-            zIndex: 1, display: 'block'
+            display: 'block', zIndex: 1
           }} 
         />
         
