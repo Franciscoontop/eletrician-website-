@@ -72,7 +72,7 @@ const Home = () => {
 
       try {
         const isMobile = window.innerWidth < 768;
-        let response = await fetch(isMobile ? '/mobile-lightbulb.webp' : '/lightbulb.webp');
+        let response = await fetch(isMobile ? '/light bulb video 720x1280.webp' : '/lightbulb.webp');
         if (!response.ok) {
            response = await fetch('/lightbulb.webp');
         }
