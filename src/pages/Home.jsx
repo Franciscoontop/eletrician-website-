@@ -1,81 +1,392 @@
-import React, { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Shield, Zap, Wrench, CheckCircle, Clock, Award, Star, Heart, ArrowRight } from 'lucide-react';
 
 const Home = () => {
-  const observerRef = useRef(null);
+  const canvasRef = useRef(null);
+  const containerRef = useRef(null);
+  const location = useLocation();
+  
+  const [isAnimFinished, setIsAnimFinished] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [framesReady, setFramesReady] = useState(false);
 
-  // Set up IntersectionObserver to trigger animations when elements scroll into view
+  // Refs for ultra-smooth lerping
+  const targetProgress = useRef(0);
+  const currentProgress = useRef(0);
+  const animationFrameId = useRef(null);
+  const framesRef = useRef([]); 
+  const frameCountRef = useRef(0);
+  const lastTouchY = useRef(0);
+
+  // Draw a specific frame index to the canvas
+  const drawFrame = useCallback((frameIndex) => {
+    const canvas = canvasRef.current;
+    const frames = framesRef.current;
+    if (!canvas || !frames.length) return;
+    
+    const idx = Math.max(0, Math.min(frames.length - 1, Math.round(frameIndex)));
+    const bitmap = frames[idx];
+    if (!bitmap) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    const dpr = window.devicePixelRatio || 1;
+    const displayWidth = window.innerWidth;
+    const displayHeight = window.innerHeight;
+    
+    if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
+      canvas.width = displayWidth * dpr;
+      canvas.height = displayHeight * dpr;
+      canvas.style.width = displayWidth + 'px';
+      canvas.style.height = displayHeight + 'px';
+      ctx.scale(dpr, dpr);
+    }
+    
+    let scale;
+    if (displayWidth < 768) {
+      scale = Math.min(displayWidth / bitmap.width, displayHeight / bitmap.height) * 1.2;
+    } else {
+      scale = Math.max(displayWidth / bitmap.width, displayHeight / bitmap.height);
+    }
+
+    const x = (displayWidth - bitmap.width * scale) / 2;
+    const y = (displayHeight - bitmap.height * scale) / 2;
+    
+    ctx.clearRect(0, 0, displayWidth, displayHeight);
+    ctx.drawImage(bitmap, x, y, bitmap.width * scale, bitmap.height * scale);
+  }, []);
+
+  // ===== EXTRACT MP4 FRAMES INTO MEMORY =====
   useEffect(() => {
-    observerRef.current = new IntersectionObserver(
+    let cancelled = false;
+
+    if (framesRef.current.length > 0) {
+      setFramesReady(true);
+      drawFrame(0);
+      return;
+    }
+
+    const extractFrames = async () => {
+      try {
+        const video = document.createElement('video');
+        video.src = '/Lever_flipping,_LED_bulb_glowing_202606191155.mp4';
+        video.muted = true;
+        video.playsInline = true;
+        video.crossOrigin = 'anonymous';
+
+        await new Promise((resolve) => {
+          video.addEventListener('loadeddata', resolve, { once: true });
+        });
+
+        const fps = 24;
+        const duration = video.duration;
+        const totalFrames = Math.ceil(duration * fps);
+        frameCountRef.current = totalFrames;
+        
+        const frames = [];
+        const offscreen = document.createElement('canvas');
+        const offCtx = offscreen.getContext('2d');
+        offscreen.width = video.videoWidth;
+        offscreen.height = video.videoHeight;
+
+        let currentFrame = 0;
+
+        const captureFrame = async () => {
+          if (cancelled) return;
+          
+          offCtx.drawImage(video, 0, 0, offscreen.width, offscreen.height);
+          const bitmap = await createImageBitmap(offscreen);
+          frames.push(bitmap);
+
+          // Show first frame immediately so screen isn't black
+          if (currentFrame === 0) {
+            framesRef.current = frames;
+            drawFrame(0);
+          }
+
+          currentFrame++;
+          if (currentFrame < totalFrames) {
+            video.currentTime = currentFrame / fps;
+          } else {
+            framesRef.current = frames;
+            setFramesReady(true);
+            drawFrame(0);
+          }
+        };
+
+        video.addEventListener('seeked', captureFrame);
+        video.currentTime = 0;
+
+      } catch (err) {
+        console.error('Frame extraction failed:', err);
+      }
+    };
+
+    extractFrames();
+    return () => { cancelled = true; };
+  }, [drawFrame]);
+
+  // Reset when Home/Logo is clicked
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    window.scrollTo(0, 0);
+    setIsAnimFinished(false);
+    setScrollProgress(0);
+    targetProgress.current = 0;
+    currentProgress.current = 0;
+    
+    if (framesRef.current.length > 0) {
+      drawFrame(0);
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [location.state, drawFrame]);
+
+  // Lock/unlock body scroll
+  useEffect(() => {
+    document.body.style.overflow = isAnimFinished ? 'auto' : 'hidden';
+  }, [isAnimFinished]);
+
+  // Main scroll-driven animation engine
+  useEffect(() => {
+    const handleWheel = (e) => {
+      if (isAnimFinished) return;
+      const maxDelta = 80;
+      const clampedDeltaY = Math.max(-maxDelta, Math.min(maxDelta, e.deltaY));
+      const scrollAmount = clampedDeltaY * 0.0005; 
+      targetProgress.current = Math.max(0, Math.min(1.05, targetProgress.current + scrollAmount));
+    };
+
+    const handleTouchStart = (e) => {
+      if (isAnimFinished) return;
+      lastTouchY.current = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e) => {
+      if (isAnimFinished) return;
+      e.preventDefault();
+      const currentTouchY = e.touches[0].clientY;
+      const deltaY = lastTouchY.current - currentTouchY;
+      lastTouchY.current = currentTouchY;
+      
+      const maxDelta = 40;
+      const clampedDelta = Math.max(-maxDelta, Math.min(maxDelta, deltaY));
+      const scrollAmount = clampedDelta * 0.001;
+      targetProgress.current = Math.max(0, Math.min(1.05, targetProgress.current + scrollAmount));
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    const smoothUpdate = () => {
+      if (!isAnimFinished) {
+        currentProgress.current += (targetProgress.current - currentProgress.current) * 0.03;
+        
+        const renderProgress = Math.max(0, Math.min(1, currentProgress.current));
+        
+        setScrollProgress((prev) => {
+           if (Math.abs(prev - renderProgress) > 0.0005) return renderProgress;
+           return prev;
+        });
+
+        if (framesRef.current.length > 0 && frameCountRef.current > 0) {
+          const frameIndex = Math.round(renderProgress * (frameCountRef.current - 1));
+          drawFrame(frameIndex);
+        }
+
+        if (currentProgress.current >= 0.99 && targetProgress.current >= 1.0) {
+           setIsAnimFinished(true);
+        }
+      }
+      animationFrameId.current = requestAnimationFrame(smoothUpdate);
+    };
+
+    animationFrameId.current = requestAnimationFrame(smoothUpdate);
+    
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
+    };
+  }, [isAnimFinished, drawFrame]);
+
+  // Re-lock if user scrolls back to very top
+  useEffect(() => {
+    const handleGlobalScroll = () => {
+       if (isAnimFinished && window.scrollY <= 5) {
+         setIsAnimFinished(false);
+         targetProgress.current = 0.98;
+         currentProgress.current = 0.98;
+         setScrollProgress(0.98);
+       }
+    };
+    window.addEventListener('scroll', handleGlobalScroll);
+    return () => window.removeEventListener('scroll', handleGlobalScroll);
+  }, [isAnimFinished]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (framesRef.current.length > 0) {
+        const frameIndex = Math.round(currentProgress.current * (frameCountRef.current - 1));
+        drawFrame(frameIndex);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [drawFrame]);
+
+  // Scroll-triggered animations for content below the hero
+  useEffect(() => {
+    if (!isAnimFinished) return;
+    
+    const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('is-visible');
-            // Once animated, stop observing so it doesn't replay
-            observerRef.current.unobserve(entry.target);
+            observer.unobserve(entry.target);
           }
         });
       },
       { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }
     );
 
-    // Observe all elements with scroll-animation classes
-    const animatedElements = document.querySelectorAll(
-      '.scroll-fade-up, .scroll-fade-left, .scroll-fade-right, .scroll-scale-in'
-    );
-    animatedElements.forEach((el) => observerRef.current.observe(el));
+    const els = document.querySelectorAll('.scroll-fade-up, .scroll-fade-left, .scroll-fade-right, .scroll-scale-in');
+    els.forEach((el) => observer.observe(el));
 
-    return () => {
-      if (observerRef.current) observerRef.current.disconnect();
-    };
-  }, []);
+    return () => observer.disconnect();
+  }, [isAnimFinished]);
+
+  // Phase calculator for hero text transitions
+  const calculatePhase = (start, end) => {
+    if (scrollProgress < start) return { opacity: 0, translateY: 80 };
+    if (scrollProgress > end) return { opacity: 0, translateY: -80 };
+    
+    const range = end - start;
+    const p = (scrollProgress - start) / range;
+    
+    let opacity = 1;
+    if (p < 0.2) opacity = p * 5;
+    else if (p > 0.8) opacity = (1 - p) * 5;
+    
+    return { opacity: Math.max(0, Math.min(1, opacity)), translateY: 40 - (p * 80) };
+  };
+
+  const phase1 = calculatePhase(0.0, 0.25);
+  const phase2 = calculatePhase(0.25, 0.50);
+  const phase3 = calculatePhase(0.50, 0.75);
+  const phase4 = calculatePhase(0.75, 1.00);
 
   return (
     <div>
-      {/* ===== HERO SECTION ===== */}
-      <section className="hero" style={{ position: 'relative', overflow: 'hidden' }}>
+      {/* ===== SCROLL-LOCKED HERO ANIMATION ===== */}
+      <section ref={containerRef} style={{ position: 'relative', height: '100vh', overflow: 'hidden', backgroundColor: '#000' }}>
         
-        {/* Background video */}
-        <video 
-          autoPlay muted loop playsInline preload="auto"
+        {/* Fallback image shown instantly while frames extract */}
+        <img 
+          src="/lightbulb.webp" 
+          alt="" 
+          className="hero-fallback-image"
           style={{ 
             position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-            objectFit: 'cover', zIndex: 0, opacity: 0.4
-          }}
-        >
-          <source src="/Lever_flipping,_LED_bulb_glowing_202606191155.mp4" type="video/mp4" />
-        </video>
+            zIndex: 0, opacity: framesReady ? 0 : 1, transition: 'opacity 0.5s ease'
+          }} 
+        />
 
+        {/* Canvas for frame-by-frame scrubbing */}
+        <canvas 
+          ref={canvasRef} 
+          style={{ 
+            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+            display: 'block', zIndex: 1, opacity: framesReady ? 1 : 0, transition: 'opacity 0.5s ease'
+          }} 
+        />
+        
         {/* Gradient overlay */}
         <div style={{
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-          background: 'linear-gradient(180deg, rgba(10,10,12,0.6) 0%, rgba(10,10,12,0.3) 40%, rgba(10,10,12,0.8) 100%)',
-          zIndex: 1
+          background: `linear-gradient(180deg, 
+            rgba(10,10,12,${0.3 + scrollProgress * 0.7}) 0%, 
+            rgba(10,10,12,${0.1 + scrollProgress * 0.6}) 40%,
+            rgba(10,10,12,${0.4 + scrollProgress * 0.6}) 100%
+          )`,
+          zIndex: 2
         }}></div>
         
-        <div className="hero-content" style={{ position: 'relative', zIndex: 2 }}>
-          <h1 className="hero-title">
-            <span className="text-gradient">Powering The Future, </span>
-            <span className="text-accent">Brilliantly.</span>
-          </h1>
-          <p className="hero-subtitle">Premium electrical installations and smart solutions for the modern world.</p>
-          <div className="hero-buttons">
-            <Link to="/services" className="btn-primary">Explore Services</Link>
-            <Link to="/contact" className="btn-secondary">Get a Quote</Link>
+        <div className="hero" style={{ height: '100vh', position: 'relative', zIndex: 3, background: 'transparent' }}>
+          
+          {/* Phase 1 */}
+          <div className="hero-content" style={{ 
+            position: 'absolute', top: '50%', left: '50%', 
+            transform: `translate(-50%, calc(-50% + ${phase1.translateY}px))`,
+            opacity: phase1.opacity, width: '100%',
+            pointerEvents: scrollProgress < 0.2 ? 'auto' : 'none'
+          }}>
+            <h1 className="hero-title">
+              <span className="text-gradient">Powering The Future, </span>
+              <span className="text-accent">Brilliantly.</span>
+            </h1>
+            <p className="hero-subtitle">Premium electrical installations and smart solutions for the modern world.</p>
+            <div className="hero-buttons">
+              <Link to="/services" className="btn-primary">Explore Services</Link>
+              <Link to="/contact" className="btn-secondary">Get a Quote</Link>
+            </div>
           </div>
-        </div>
 
-        {/* Scroll hint */}
-        <div style={{
-          position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
-          textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', zIndex: 2,
-          animation: 'pulse 2s ease-in-out infinite'
-        }}>
-          <div style={{ width: '24px', height: '40px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '12px', margin: '0 auto 0.5rem', position: 'relative' }}>
-            <div style={{ width: '4px', height: '8px', backgroundColor: 'var(--accent-amber)', borderRadius: '2px', position: 'absolute', top: '6px', left: '50%', transform: 'translateX(-50%)', animation: 'pulse 2s ease-in-out infinite' }}></div>
+          {/* Phase 2 */}
+          <div className="hero-content" style={{ 
+            position: 'absolute', top: '50%', left: '50%', 
+            transform: `translate(-50%, calc(-50% + ${phase2.translateY}px))`,
+            opacity: phase2.opacity, width: '100%', pointerEvents: 'none'
+          }}>
+            <h1 className="hero-title" style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}>
+              <span className="text-gradient">Uncompromising Quality.</span>
+            </h1>
+            <p className="hero-subtitle" style={{ color: '#fff' }}>We engineer reliable, high-performance energy systems designed to last a lifetime.</p>
           </div>
-          Scroll to explore
+
+          {/* Phase 3 */}
+          <div className="hero-content" style={{ 
+            position: 'absolute', top: '50%', left: '50%', 
+            transform: `translate(-50%, calc(-50% + ${phase3.translateY}px))`,
+            opacity: phase3.opacity, width: '100%', pointerEvents: 'none'
+          }}>
+            <h1 className="hero-title" style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}>
+              <span className="text-accent">Smart</span> Home Ready.
+            </h1>
+            <p className="hero-subtitle" style={{ color: '#fff' }}>Seamless integration with the latest automated technology.</p>
+          </div>
+
+          {/* Phase 4 */}
+          <div className="hero-content" style={{ 
+            position: 'absolute', top: '50%', left: '50%', 
+            transform: `translate(-50%, calc(-50% + ${phase4.translateY}px))`,
+            opacity: phase4.opacity, width: '100%', pointerEvents: 'none'
+          }}>
+            <h1 className="hero-title" style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}>
+              <span className="text-gradient">Industrial Grade </span>
+              <span className="text-accent">Power.</span>
+            </h1>
+            <p className="hero-subtitle" style={{ color: '#fff' }}>The backbone your business needs to thrive.</p>
+          </div>
+
+          {/* Scroll hint */}
+          <div style={{
+            position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
+            opacity: scrollProgress < 0.05 ? 1 : 0, transition: 'opacity 0.5s ease',
+            textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem',
+          }}>
+            <div style={{ width: '24px', height: '40px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '12px', margin: '0 auto 0.5rem', position: 'relative' }}>
+              <div style={{ width: '4px', height: '8px', backgroundColor: 'var(--accent-amber)', borderRadius: '2px', position: 'absolute', top: '6px', left: '50%', transform: 'translateX(-50%)', animation: 'pulse 2s ease-in-out infinite' }}></div>
+            </div>
+            Scroll to explore
+          </div>
         </div>
       </section>
 
