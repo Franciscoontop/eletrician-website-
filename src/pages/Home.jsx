@@ -1,20 +1,44 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Zap, Wrench, CheckCircle, Clock, Award, Star, Heart, ArrowRight } from 'lucide-react';
 
 const Home = () => {
+  const observerRef = useRef(null);
+
+  // Set up IntersectionObserver to trigger animations when elements scroll into view
+  useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            // Once animated, stop observing so it doesn't replay
+            observerRef.current.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    // Observe all elements with scroll-animation classes
+    const animatedElements = document.querySelectorAll(
+      '.scroll-fade-up, .scroll-fade-left, .scroll-fade-right, .scroll-scale-in'
+    );
+    animatedElements.forEach((el) => observerRef.current.observe(el));
+
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect();
+    };
+  }, []);
+
   return (
     <div>
       {/* ===== HERO SECTION ===== */}
       <section className="hero" style={{ position: 'relative', overflow: 'hidden' }}>
         
-        {/* Background video — plays automatically, loops, purely decorative */}
+        {/* Background video */}
         <video 
-          autoPlay 
-          muted 
-          loop 
-          playsInline
-          preload="auto"
+          autoPlay muted loop playsInline preload="auto"
           style={{ 
             position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
             objectFit: 'cover', zIndex: 0, opacity: 0.4
@@ -60,22 +84,22 @@ const Home = () => {
         
         {/* Why Choose Section */}
         <section className="section container">
-          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+          <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <h2 className="responsive-heading">Why Choose <span className="text-accent">Lumina</span></h2>
             <p style={{ color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto' }}>We bring light to the darkest corners with state-of-the-art technology and master craftsmanship.</p>
           </div>
           <div className="services-grid">
-            <div className="service-card glass-panel">
+            <div className="service-card glass-panel scroll-fade-up stagger-1">
               <div className="service-icon"><Zap size={32} /></div>
               <h3>Modern Solutions</h3>
               <p style={{ color: 'var(--text-muted)' }}>From smart home integrations to energy-efficient LED upgrades, we use the latest technology to power your space.</p>
             </div>
-            <div className="service-card glass-panel">
+            <div className="service-card glass-panel scroll-fade-up stagger-2">
               <div className="service-icon"><Shield size={32} /></div>
               <h3>Premium Safety</h3>
               <p style={{ color: 'var(--text-muted)' }}>Your safety is our top priority. We exceed industry standards to ensure every connection is flawlessly secure.</p>
             </div>
-            <div className="service-card glass-panel">
+            <div className="service-card glass-panel scroll-fade-up stagger-3">
               <div className="service-icon"><Wrench size={32} /></div>
               <h3>Master Craftsmanship</h3>
               <p style={{ color: 'var(--text-muted)' }}>Our team of licensed professionals treats every wire and panel as a work of art.</p>
@@ -84,7 +108,7 @@ const Home = () => {
         </section>
 
         {/* Featured Image Banner */}
-        <section className="image-banner">
+        <section className="image-banner scroll-scale-in">
           <img src="/electrician-panel.png" alt="Electrician working on panel" />
           <div className="image-banner-overlay"></div>
           <div className="image-banner-content">
@@ -97,10 +121,10 @@ const Home = () => {
         <section className="section" style={{ backgroundColor: 'rgba(245, 158, 11, 0.05)', borderTop: '1px solid var(--border-glass)', borderBottom: '1px solid var(--border-glass)' }}>
           <div className="container">
             <div className="stats-grid">
-              <div><h3 className="stat-number">15+</h3><p className="stat-label">Years Experience</p></div>
-              <div><h3 className="stat-number">2.5k</h3><p className="stat-label">Projects Completed</p></div>
-              <div><h3 className="stat-number">100%</h3><p className="stat-label">Safety Record</p></div>
-              <div><h3 className="stat-number">24/7</h3><p className="stat-label">Emergency Support</p></div>
+              <div className="scroll-fade-up stagger-1"><h3 className="stat-number">15+</h3><p className="stat-label">Years Experience</p></div>
+              <div className="scroll-fade-up stagger-2"><h3 className="stat-number">2.5k</h3><p className="stat-label">Projects Completed</p></div>
+              <div className="scroll-fade-up stagger-3"><h3 className="stat-number">100%</h3><p className="stat-label">Safety Record</p></div>
+              <div className="scroll-fade-up stagger-4"><h3 className="stat-number">24/7</h3><p className="stat-label">Emergency Support</p></div>
             </div>
           </div>
         </section>
@@ -108,7 +132,7 @@ const Home = () => {
         {/* Our Story Section */}
         <section className="section container">
           <div className="story-grid">
-            <div>
+            <div className="scroll-fade-left">
               <p style={{ color: 'var(--accent-amber)', fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>Our Story</p>
               <h2 className="responsive-heading" style={{ marginBottom: '1.5rem', lineHeight: 1.2 }}>Built on <span className="text-accent">Trust</span>, Powered by <span className="text-gradient">Innovation</span></h2>
               <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.8 }}>
@@ -128,7 +152,7 @@ const Home = () => {
                 </div>
               </div>
             </div>
-            <div className="glass-panel" style={{ padding: '2rem', background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(10,10,12,0.9) 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2rem' }}>
+            <div className="glass-panel scroll-fade-right" style={{ padding: '2rem', background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(10,10,12,0.9) 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2rem' }}>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
                 <Heart size={24} color="var(--accent-amber)" style={{ marginTop: '2px', flexShrink: 0 }} />
                 <div><h4 style={{ color: '#fff', marginBottom: '0.5rem' }}>Our Mission</h4><p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.7 }}>To deliver electrical excellence that enhances safety, comfort, and energy efficiency for every client.</p></div>
@@ -148,7 +172,7 @@ const Home = () => {
         </section>
 
         {/* Smart Home Image Banner */}
-        <section className="image-banner">
+        <section className="image-banner scroll-scale-in">
           <img src="/smart-home.png" alt="Smart home interior lighting" />
           <div className="image-banner-overlay"></div>
           <div className="image-banner-content">
@@ -159,7 +183,7 @@ const Home = () => {
 
         {/* Process Section */}
         <section className="section container">
-          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+          <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <p style={{ color: 'var(--accent-amber)', fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>How We Work</p>
             <h2 className="responsive-heading">Our Proven <span className="text-accent">Process</span></h2>
             <p style={{ color: 'var(--text-muted)', maxWidth: '600px', margin: '0.5rem auto 0' }}>Seamless execution from consultation to the final switch flip.</p>
@@ -171,7 +195,7 @@ const Home = () => {
               { icon: <CheckCircle size={24} />, title: '3. Inspection', desc: 'Rigorous testing to ensure everything meets the highest standards.' },
               { icon: <Award size={24} />, title: '4. Guarantee', desc: 'Backed by our ironclad Lumina performance guarantee.' },
             ].map((step, i) => (
-              <div key={i} className="glass-panel" style={{ padding: '2rem', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+              <div key={i} className={`glass-panel scroll-fade-up stagger-${i + 1}`} style={{ padding: '2rem', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
                 <div className="process-icon">{step.icon}</div>
                 <div><h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem' }}>{step.title}</h3><p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>{step.desc}</p></div>
               </div>
@@ -182,7 +206,7 @@ const Home = () => {
         {/* Testimonials */}
         <section className="section" style={{ backgroundColor: 'rgba(245, 158, 11, 0.03)', borderTop: '1px solid var(--border-glass)', borderBottom: '1px solid var(--border-glass)' }}>
           <div className="container">
-            <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '4rem' }}>
               <p style={{ color: 'var(--accent-amber)', fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>Testimonials</p>
               <h2 className="responsive-heading">What Our <span className="text-accent">Clients</span> Say</h2>
             </div>
@@ -192,7 +216,7 @@ const Home = () => {
                 { initials: 'SL', name: 'Sarah L.', role: 'Restaurant Owner, Commercial', quote: '"We needed a full electrical build-out in just three weeks. Lumina delivered ahead of schedule with zero issues during inspection."' },
                 { initials: 'DK', name: 'David K.', role: 'Operations Manager, Industrial', quote: '"Outstanding work on our warehouse high-voltage installation. Their attention to safety protocols is second to none."' },
               ].map((t, i) => (
-                <div key={i} className="glass-panel" style={{ padding: '2rem' }}>
+                <div key={i} className={`glass-panel scroll-fade-up stagger-${i + 1}`} style={{ padding: '2rem' }}>
                   <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem' }}>{[1,2,3,4,5].map(s => <Star key={s} size={18} fill="var(--accent-amber)" color="var(--accent-amber)" />)}</div>
                   <p style={{ color: '#ddd', fontStyle: 'italic', marginBottom: '1.5rem', lineHeight: 1.8 }}>{t.quote}</p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -206,7 +230,7 @@ const Home = () => {
         </section>
 
         {/* Industrial Image Banner */}
-        <section className="image-banner">
+        <section className="image-banner scroll-scale-in">
           <img src="/industrial-power.png" alt="Industrial power systems" />
           <div className="image-banner-overlay"></div>
           <div className="image-banner-content">
@@ -218,7 +242,7 @@ const Home = () => {
         {/* CTA Banner */}
         <section className="section">
           <div className="container">
-            <div className="glass-panel cta-banner">
+            <div className="glass-panel cta-banner scroll-fade-up">
               <h2 className="responsive-heading">Ready to <span className="text-accent">Light Up</span> Your Project?</h2>
               <p style={{ color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto 2rem', fontSize: '1.1rem' }}>Get a free, no-obligation estimate today.</p>
               <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
