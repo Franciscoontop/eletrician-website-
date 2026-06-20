@@ -73,10 +73,11 @@ const Home = () => {
         video.src = '/Lever_flipping,_LED_bulb_glowing_202606191155.mp4';
         video.muted = true;
         video.playsInline = true;
-        video.crossOrigin = 'anonymous';
+        video.preload = 'auto';
 
         await new Promise((resolve) => {
-          video.addEventListener('loadeddata', resolve, { once: true });
+          video.addEventListener('canplaythrough', resolve, { once: true });
+          video.load();
         });
 
         const fps = 24;
@@ -92,14 +93,14 @@ const Home = () => {
 
         let currentFrame = 0;
 
-        const captureFrame = async () => {
+        // Capture whatever frame the video is currently showing
+        const captureCurrentFrame = async () => {
           if (cancelled) return;
           
           offCtx.drawImage(video, 0, 0, offscreen.width, offscreen.height);
           const bitmap = await createImageBitmap(offscreen);
           frames.push(bitmap);
 
-          // Show first frame immediately so screen isn't black
           if (currentFrame === 0) {
             framesRef.current = frames;
             drawFrame(0);
@@ -115,8 +116,12 @@ const Home = () => {
           }
         };
 
-        video.addEventListener('seeked', captureFrame);
-        video.currentTime = 0;
+        // Listen for seeked events for frames 1, 2, 3...
+        video.addEventListener('seeked', captureCurrentFrame);
+        
+        // Capture frame 0 RIGHT NOW (video is already at time 0 after load,
+        // so setting currentTime=0 won't fire 'seeked')
+        await captureCurrentFrame();
 
       } catch (err) {
         console.error('Frame extraction failed:', err);
@@ -288,14 +293,17 @@ const Home = () => {
       {/* ===== SCROLL-LOCKED HERO ANIMATION ===== */}
       <section ref={containerRef} style={{ position: 'relative', height: '100vh', overflow: 'hidden', backgroundColor: '#000' }}>
         
-        {/* Fallback image shown instantly while frames extract */}
-        <img 
-          src="/lightbulb.webp" 
-          alt="" 
-          className="hero-fallback-image"
+        {/* Static poster from video — shown while frames extract, NOT an animated file */}
+        <video 
+          src="/Lever_flipping,_LED_bulb_glowing_202606191155.mp4"
+          muted
+          playsInline
+          preload="auto"
           style={{ 
             position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-            zIndex: 0, opacity: framesReady ? 0 : 1, transition: 'opacity 0.5s ease'
+            objectFit: 'cover', zIndex: 0, 
+            opacity: framesReady ? 0 : 1, transition: 'opacity 0.5s ease',
+            pointerEvents: 'none'
           }} 
         />
 
