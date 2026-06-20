@@ -67,6 +67,17 @@ const Home = () => {
       return;
     }
 
+    const seekTo = (video, time) => {
+      return new Promise((resolve) => {
+        const onSeeked = () => {
+          video.removeEventListener('seeked', onSeeked);
+          resolve();
+        };
+        video.addEventListener('seeked', onSeeked);
+        video.currentTime = time;
+      });
+    };
+
     const extractFrames = async () => {
       try {
         const video = document.createElement('video');
@@ -75,8 +86,9 @@ const Home = () => {
         video.playsInline = true;
         video.preload = 'auto';
 
-        await new Promise((resolve) => {
+        await new Promise((resolve, reject) => {
           video.addEventListener('canplaythrough', resolve, { once: true });
+          video.addEventListener('error', reject, { once: true });
           video.load();
         });
 
@@ -91,37 +103,34 @@ const Home = () => {
         offscreen.width = video.videoWidth;
         offscreen.height = video.videoHeight;
 
-        let currentFrame = 0;
-
-        // Capture whatever frame the video is currently showing
-        const captureCurrentFrame = async () => {
+        for (let i = 0; i < totalFrames; i++) {
           if (cancelled) return;
+
+          const targetTime = i / fps;
+          if (i === 0 && video.currentTime === 0) {
+            // Already at frame 0, no seek needed
+          } else {
+            await seekTo(video, targetTime);
+          }
           
           offCtx.drawImage(video, 0, 0, offscreen.width, offscreen.height);
           const bitmap = await createImageBitmap(offscreen);
           frames.push(bitmap);
 
-          if (currentFrame === 0) {
+          // Show first frame on canvas immediately
+          if (i === 0 && !cancelled) {
             framesRef.current = frames;
             drawFrame(0);
           }
+        }
 
-          currentFrame++;
-          if (currentFrame < totalFrames) {
-            video.currentTime = currentFrame / fps;
-          } else {
-            framesRef.current = frames;
-            setFramesReady(true);
-            drawFrame(0);
-          }
-        };
-
-        // Listen for seeked events for frames 1, 2, 3...
-        video.addEventListener('seeked', captureCurrentFrame);
-        
-        // Capture frame 0 RIGHT NOW (video is already at time 0 after load,
-        // so setting currentTime=0 won't fire 'seeked')
-        await captureCurrentFrame();
+        if (!cancelled) {
+          framesRef.current = frames;
+          frameCountRef.current = frames.length;
+          setFramesReady(true);
+          drawFrame(0);
+          console.log(`✅ Extracted ${frames.length} frames from video`);
+        }
 
       } catch (err) {
         console.error('Frame extraction failed:', err);
