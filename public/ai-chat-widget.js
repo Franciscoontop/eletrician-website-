@@ -250,7 +250,7 @@ function injectHTML() {
     <!-- FLOATING CHAT BUBBLE -->
     <div id="ai-chat-bubble">
       <svg style="width:30px;height:30px;fill:#000" viewBox="0 0 24 24">
-        <path d="M19,9L17.75,11.75L15,13L17.75,14.25L19,17L20.25,14.25L23,13L20.25,11.75L19,9M9,5L7,11L1,13L7,15L9,21L11,15L17,13L11,11L9,5M19,1L18.25,2.75L16.5,3.5L18.25,4.25L19,6L19.75,4.25L21.5,3.5L19.75,2.75L19,1Z"/>
+        <path d="M20,2H4C2.9,2 2,2.9 2,4V22L6,18H20C21.1,18 22,17.1 22,16V4C22,2.9 21.1,2 20,2Z"/>
       </svg>
     </div>
 
@@ -506,7 +506,7 @@ async function send(overrideMsg = null) {
     `<div class="ai-message-row ai-row-ai">
        <div class="ai-avatar ai-avatar-ai">
          <svg style="width:14px;height:14px;fill:#000" viewBox="0 0 24 24">
-           <path d="M9,5L7,11L1,13L7,15L9,21L11,15L17,13L11,11L9,5"/>
+           <path d="M11 15H6L13 1V9H18L11 23V15Z"/>
          </svg>
        </div>
        <div id="${bubbleId}" class="ai-msg-bubble ai-msg-ai thinking-state">
@@ -621,7 +621,7 @@ function setGreeting(text) {
     `<div class="ai-message-row ai-row-ai">
        <div class="ai-avatar ai-avatar-ai">
          <svg style="width:14px;height:14px;fill:#000" viewBox="0 0 24 24">
-           <path d="M9,5L7,11L1,13L7,15L9,21L11,15L17,13L11,11L9,5"/>
+           <path d="M11 15H6L13 1V9H18L11 23V15Z"/>
          </svg>
        </div>
        <div class="ai-msg-bubble ai-msg-ai">${text}</div>

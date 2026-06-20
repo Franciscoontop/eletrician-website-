@@ -305,6 +305,7 @@ const Home = () => {
             width: '100vw',
             height: '100vh',
             objectFit: 'cover',
+            objectPosition: '75% 50%',
             display: isVideoFallback ? 'block' : 'none',
             zIndex: 0,
           }}
