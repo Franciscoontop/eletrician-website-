@@ -20,38 +20,55 @@ const Home = () => {
   useEffect(() => {
     let cancelled = false;
 
-    if (videoRef.current) {
-      videoRef.current.load();
-      
-      const onCanPlay = () => {
-        if (!cancelled) setIsVideoReady(true);
-      };
-      videoRef.current.addEventListener('canplaythrough', onCanPlay);
-      videoRef.current.addEventListener('loadeddata', onCanPlay);
-
-      // --- iOS Safari Touch Unlock Hack ---
-      const unlockVideo = () => {
+    const loadVideoAsBlob = async () => {
+      try {
+        const isMobile = window.innerWidth < 768;
+        const videoUrl = isMobile ? "/new png 720x12980 light bulb.mp4" : "/new destktop light bulb aniamtion.mp4";
+        const response = await fetch(videoUrl);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        
+        if (cancelled) return;
+        
         if (videoRef.current) {
-          videoRef.current.play().then(() => {
-            if (videoRef.current) videoRef.current.pause();
-          }).catch(() => {});
-        }
-        window.removeEventListener('touchstart', unlockVideo);
-      };
-      window.addEventListener('touchstart', unlockVideo);
-      
-      // Fallback timeout
-      setTimeout(() => { if (!cancelled) setIsVideoReady(true); }, 1500);
+          videoRef.current.src = blobUrl;
+          videoRef.current.load();
+          
+          const onCanPlay = () => {
+            if (!cancelled) setIsVideoReady(true);
+          };
+          videoRef.current.addEventListener('canplaythrough', onCanPlay);
+          videoRef.current.addEventListener('loadeddata', onCanPlay);
 
-      return () => {
-        cancelled = true;
-        if (videoRef.current) {
-          videoRef.current.removeEventListener('canplaythrough', onCanPlay);
-          videoRef.current.removeEventListener('loadeddata', onCanPlay);
+          // --- iOS Safari Touch Unlock Hack ---
+          const unlockVideo = () => {
+            if (videoRef.current) {
+              videoRef.current.play().then(() => {
+                if (videoRef.current) videoRef.current.pause();
+              }).catch(() => {});
+            }
+            window.removeEventListener('touchstart', unlockVideo);
+          };
+          window.addEventListener('touchstart', unlockVideo);
+          
+          setTimeout(() => { if (!cancelled) setIsVideoReady(true); }, 1500);
+
+          return () => {
+            if (videoRef.current) {
+              videoRef.current.removeEventListener('canplaythrough', onCanPlay);
+              videoRef.current.removeEventListener('loadeddata', onCanPlay);
+            }
+            window.removeEventListener('touchstart', unlockVideo);
+          };
         }
-        window.removeEventListener('touchstart', unlockVideo);
-      };
-    }
+      } catch (err) {
+        console.error("Failed to load video blob:", err);
+      }
+    };
+
+    loadVideoAsBlob();
+
+    return () => { cancelled = true; };
   }, []);
 
   // ===== RESET ON HOME/LOGO CLICK =====
@@ -194,7 +211,6 @@ const Home = () => {
         {/* z-index: 0 — native video engine */}
         <video
           ref={videoRef}
-          src={window.innerWidth < 768 ? "/new png 720x12980 light bulb.mp4" : "/new destktop light bulb aniamtion.mp4"}
           muted
           playsInline
           preload="auto"
