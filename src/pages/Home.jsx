@@ -57,7 +57,7 @@ const Home = () => {
   useEffect(() => {
     let cancelled = false;
 
-    if (framesRef.current.length > 0 || isVideoFallback) {
+    if (framesRef.current.length > 0) {
       setFramesReady(true);
       if (!isVideoFallback) drawFrame(0);
       return;
@@ -67,7 +67,7 @@ const Home = () => {
       const isMobile = window.innerWidth < 768;
       
       // If mobile or Firefox/Safari Desktop, jump straight to video fallback for perfect native MP4 scrubbing
-      if (isMobile || !window.ImageDecoder) {
+      if (isVideoFallback || isMobile || !window.ImageDecoder) {
         setIsVideoFallback(true);
         setFramesReady(true);
         
