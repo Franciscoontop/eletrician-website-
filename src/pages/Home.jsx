@@ -64,26 +64,8 @@ const Home = () => {
 
     const extractFrames = async () => {
       if (!window.ImageDecoder) {
-        console.warn('ImageDecoder not supported. Falling back to video Blob scrubbing.');
+        console.warn('ImageDecoder not supported. Falling back to simple video element.');
         setIsVideoFallback(true);
-        
-        try {
-          const isMobile = window.innerWidth < 768;
-          let res = await fetch(isMobile ? '/mobile-video.mp4' : '/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
-          if (!res.ok) res = await fetch('/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
-          
-          const blob = await res.blob();
-          const videoUrl = URL.createObjectURL(blob);
-          
-          if (videoRef.current) {
-            videoRef.current.src = videoUrl;
-            videoRef.current.load();
-          }
-        } catch (e) {
-          console.error('Video fetch failed:', e);
-        }
-        
-        // Always show the video element immediately so we don't get a black screen
         setFramesReady(true);
         return;
       }
@@ -131,27 +113,8 @@ const Home = () => {
         
         decoder.close();
       } catch (err) {
-        console.error('Frame extraction failed, falling back to video Blob:', err);
+        console.error('Frame extraction failed, falling back to simple video element:', err);
         setIsVideoFallback(true);
-        
-        try {
-          const isMobile = window.innerWidth < 768;
-          let res = await fetch(isMobile ? '/mobile-video.mp4' : '/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
-          if (!res.ok) {
-             res = await fetch('/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
-          }
-          
-          const blob = await res.blob();
-          const videoUrl = URL.createObjectURL(blob);
-          if (videoRef.current) {
-            videoRef.current.src = videoUrl;
-            videoRef.current.load();
-          }
-        } catch(e) {
-          console.error(e);
-        }
-        
-        // Show video element immediately
         setFramesReady(true);
       }
     };
@@ -332,6 +295,8 @@ const Home = () => {
           src="/Lever_flipping,_LED_bulb_glowing_202606191155.mp4"
           muted
           playsInline
+          autoPlay
+          onPlay={() => { if (videoRef.current) videoRef.current.pause(); }}
           preload="auto"
           style={{
             position: 'absolute',
