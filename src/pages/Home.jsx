@@ -95,11 +95,15 @@ const Home = () => {
       }
 
       try {
-        // Detect if user is on mobile (screen width less than 768px)
+        // Attempt to use mobile files if they exist, otherwise fallback to the desktop files.
         const isMobile = window.innerWidth < 768;
-        const webpAsset = isMobile ? '/mobile-lightbulb.webp' : '/lightbulb.webp';
         
-        const response = await fetch(webpAsset);
+        let response = await fetch(isMobile ? '/mobile-lightbulb.webp' : '/lightbulb.webp');
+        if (!response.ok) {
+           // If mobile file is missing, fallback to desktop file
+           response = await fetch('/lightbulb.webp');
+        }
+
         const blob = await response.blob();
         const arrayBuffer = await blob.arrayBuffer();
         
@@ -141,9 +145,12 @@ const Home = () => {
         
         try {
           const isMobile = window.innerWidth < 768;
-          const mp4Asset = isMobile ? '/mobile-video.mp4' : '/Lever_flipping,_LED_bulb_glowing_202606191155.mp4';
+          let res = await fetch(isMobile ? '/mobile-video.mp4' : '/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
+          if (!res.ok) {
+             // If mobile file is missing, fallback to desktop file
+             res = await fetch('/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
+          }
           
-          const res = await fetch(mp4Asset);
           const blob = await res.blob();
           const videoUrl = URL.createObjectURL(blob);
           if (videoRef.current) {
