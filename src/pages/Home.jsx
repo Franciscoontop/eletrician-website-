@@ -10,6 +10,7 @@ const Home = () => {
   const [isAnimFinished, setIsAnimFinished] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [framesReady, setFramesReady] = useState(false);
+  const [isVideoFallback, setIsVideoFallback] = useState(false);
 
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
@@ -17,6 +18,7 @@ const Home = () => {
   const framesRef = useRef([]); 
   const frameCountRef = useRef(0);
   const lastTouchY = useRef(0);
+  const videoRef = useRef(null);
 
   // ===== DRAW FRAME TO CANVAS (object-fit: cover) =====
   const drawFrame = useCallback((frameIndex) => {
@@ -54,13 +56,42 @@ const Home = () => {
   useEffect(() => {
     let cancelled = false;
 
-    if (framesRef.current.length > 0) {
+    if (framesRef.current.length > 0 || isVideoFallback) {
       setFramesReady(true);
-      drawFrame(0);
+      if (!isVideoFallback) drawFrame(0);
       return;
     }
 
     const extractFrames = async () => {
+      // Mobile Safari / Firefox don't support ImageDecoder.
+      // Fallback directly to scrubbing the MP4 video element.
+      // We fetch it as a Blob first so iOS Safari can scrub it flawlessly without network/range-request issues.
+      if (!window.ImageDecoder) {
+        console.warn('ImageDecoder not supported. Falling back to video Blob scrubbing.');
+        setIsVideoFallback(true);
+        
+        try {
+          const res = await fetch('/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
+          const blob = await res.blob();
+          const videoUrl = URL.createObjectURL(blob);
+          
+          if (videoRef.current) {
+            videoRef.current.src = videoUrl;
+            videoRef.current.onloadeddata = () => {
+              // Once the first frame is ready, show it
+              setFramesReady(true);
+            };
+            videoRef.current.load();
+          } else {
+             setFramesReady(true);
+          }
+        } catch (e) {
+          console.error('Video fetch failed:', e);
+          setFramesReady(true);
+        }
+        return;
+      }
+
       try {
         const response = await fetch('/lightbulb.webp');
         const blob = await response.blob();
@@ -84,7 +115,6 @@ const Home = () => {
           extractedFrames.push(bitmap);
           result.image.close();
           
-          // Draw frame 0 on the canvas immediately
           if (i === 0 && !cancelled) {
             framesRef.current = extractedFrames;
             drawFrame(0);
@@ -100,13 +130,29 @@ const Home = () => {
         
         decoder.close();
       } catch (err) {
-        console.error('Frame extraction failed:', err);
+        console.error('Frame extraction failed, falling back to video Blob:', err);
+        setIsVideoFallback(true);
+        
+        try {
+          const res = await fetch('/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
+          const blob = await res.blob();
+          const videoUrl = URL.createObjectURL(blob);
+          if (videoRef.current) {
+            videoRef.current.src = videoUrl;
+            videoRef.current.onloadeddata = () => setFramesReady(true);
+            videoRef.current.load();
+          } else {
+            setFramesReady(true);
+          }
+        } catch(e) {
+          setFramesReady(true);
+        }
       }
     };
 
     extractFrames();
     return () => { cancelled = true; };
-  }, [drawFrame]);
+  }, [drawFrame, isVideoFallback]);
 
   // ===== RESET ON HOME/LOGO CLICK =====
   useEffect(() => {
@@ -118,6 +164,7 @@ const Home = () => {
     currentProgress.current = 0;
     
     if (framesRef.current.length > 0) drawFrame(0);
+    if (videoRef.current) videoRef.current.currentTime = 0;
 
     return () => { document.body.style.overflow = 'auto'; };
   }, [location.state, drawFrame]);
@@ -161,8 +208,11 @@ const Home = () => {
         
         setScrollProgress((prev) => (Math.abs(prev - p) > 0.0005 ? p : prev));
 
-        if (framesRef.current.length > 0 && frameCountRef.current > 0) {
+        if (!isVideoFallback && framesRef.current.length > 0 && frameCountRef.current > 0) {
           drawFrame(Math.round(p * (frameCountRef.current - 1)));
+        } else if (isVideoFallback && videoRef.current) {
+          const duration = videoRef.current.duration || 3;
+          videoRef.current.currentTime = p * duration;
         }
 
         if (currentProgress.current >= 0.99 && targetProgress.current >= 1.0) {
@@ -265,7 +315,26 @@ const Home = () => {
             left: 0,
             width: '100vw',
             height: '100vh',
-            display: 'block',
+            display: isVideoFallback ? 'none' : 'block',
+            zIndex: 0,
+          }}
+        />
+
+        {/* z-index: 0 — fallback video for mobile Safari */}
+        <video
+          ref={videoRef}
+          src="/Lever_flipping,_LED_bulb_glowing_202606191155.mp4"
+          muted
+          playsInline
+          preload="auto"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            objectFit: 'cover',
+            display: isVideoFallback ? 'block' : 'none',
             zIndex: 0,
           }}
         />
