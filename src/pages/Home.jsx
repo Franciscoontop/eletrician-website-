@@ -11,7 +11,6 @@ const Home = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [framesReady, setFramesReady] = useState(false);
 
-  // Refs for ultra-smooth lerping
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
   const animationFrameId = useRef(null);
@@ -19,7 +18,7 @@ const Home = () => {
   const frameCountRef = useRef(0);
   const lastTouchY = useRef(0);
 
-  // Draw a specific frame index to the canvas
+  // ===== DRAW FRAME TO CANVAS (object-fit: cover) =====
   const drawFrame = useCallback((frameIndex) => {
     const canvas = canvasRef.current;
     const frames = framesRef.current;
@@ -30,34 +29,28 @@ const Home = () => {
     if (!bitmap) return;
     
     const ctx = canvas.getContext('2d');
-    
     const dpr = window.devicePixelRatio || 1;
-    const displayWidth = window.innerWidth;
-    const displayHeight = window.innerHeight;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
     
-    if (canvas.width !== displayWidth * dpr || canvas.height !== displayHeight * dpr) {
-      canvas.width = displayWidth * dpr;
-      canvas.height = displayHeight * dpr;
-      canvas.style.width = displayWidth + 'px';
-      canvas.style.height = displayHeight + 'px';
+    if (canvas.width !== vw * dpr || canvas.height !== vh * dpr) {
+      canvas.width = vw * dpr;
+      canvas.height = vh * dpr;
+      canvas.style.width = vw + 'px';
+      canvas.style.height = vh + 'px';
       ctx.scale(dpr, dpr);
     }
     
-    let scale;
-    if (displayWidth < 768) {
-      scale = Math.min(displayWidth / bitmap.width, displayHeight / bitmap.height) * 1.2;
-    } else {
-      scale = Math.max(displayWidth / bitmap.width, displayHeight / bitmap.height);
-    }
-
-    const x = (displayWidth - bitmap.width * scale) / 2;
-    const y = (displayHeight - bitmap.height * scale) / 2;
+    // object-fit: cover — always fills viewport, crops overflow
+    const scale = Math.max(vw / bitmap.width, vh / bitmap.height);
+    const x = (vw - bitmap.width * scale) / 2;
+    const y = (vh - bitmap.height * scale) / 2;
     
-    ctx.clearRect(0, 0, displayWidth, displayHeight);
+    ctx.clearRect(0, 0, vw, vh);
     ctx.drawImage(bitmap, x, y, bitmap.width * scale, bitmap.height * scale);
   }, []);
 
-  // ===== EXTRACT MP4 FRAMES BY PLAYING VIDEO =====
+  // ===== EXTRACT FRAMES FROM ANIMATED WEBP VIA ImageDecoder =====
   useEffect(() => {
     let cancelled = false;
 
@@ -69,51 +62,43 @@ const Home = () => {
 
     const extractFrames = async () => {
       try {
-        const video = document.createElement('video');
-        video.src = '/Lever_flipping,_LED_bulb_glowing_202606191155.mp4';
-        video.muted = true;
-        video.playsInline = true;
-        video.preload = 'auto';
-
-        await new Promise((resolve, reject) => {
-          video.addEventListener('canplaythrough', resolve, { once: true });
-          video.addEventListener('error', reject, { once: true });
-          video.load();
+        const response = await fetch('/lightbulb.webp');
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        
+        const decoder = new ImageDecoder({
+          type: 'image/webp',
+          data: arrayBuffer,
         });
 
-        const frames = [];
-        const offscreen = document.createElement('canvas');
-        const offCtx = offscreen.getContext('2d');
-        offscreen.width = video.videoWidth;
-        offscreen.height = video.videoHeight;
+        await decoder.tracks.ready;
+        const totalFrames = decoder.tracks.selectedTrack.frameCount;
+        frameCountRef.current = totalFrames;
 
-        // Play at 3x speed so extraction is fast
-        video.playbackRate = 3;
-        await video.play();
-
-        // Capture frames as the video plays naturally
-        while (!video.ended && !video.paused && !cancelled) {
-          offCtx.drawImage(video, 0, 0, offscreen.width, offscreen.height);
-          const bitmap = await createImageBitmap(offscreen);
-          frames.push(bitmap);
-
-          if (frames.length === 1) {
-            framesRef.current = frames;
-            frameCountRef.current = 1;
+        const extractedFrames = [];
+        
+        for (let i = 0; i < totalFrames; i++) {
+          if (cancelled) return;
+          const result = await decoder.decode({ frameIndex: i });
+          const bitmap = await createImageBitmap(result.image);
+          extractedFrames.push(bitmap);
+          result.image.close();
+          
+          // Draw frame 0 on the canvas immediately
+          if (i === 0 && !cancelled) {
+            framesRef.current = extractedFrames;
             drawFrame(0);
           }
-
-          // Wait for the next animation frame
-          await new Promise((r) => requestAnimationFrame(r));
         }
-
-        if (!cancelled && frames.length > 0) {
-          framesRef.current = frames;
-          frameCountRef.current = frames.length;
+        
+        framesRef.current = extractedFrames;
+        
+        if (!cancelled) {
           setFramesReady(true);
           drawFrame(0);
-          console.log(`Extracted ${frames.length} frames`);
         }
+        
+        decoder.close();
       } catch (err) {
         console.error('Frame extraction failed:', err);
       }
@@ -123,7 +108,7 @@ const Home = () => {
     return () => { cancelled = true; };
   }, [drawFrame]);
 
-  // Reset when Home/Logo is clicked
+  // ===== RESET ON HOME/LOGO CLICK =====
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     window.scrollTo(0, 0);
@@ -132,28 +117,23 @@ const Home = () => {
     targetProgress.current = 0;
     currentProgress.current = 0;
     
-    if (framesRef.current.length > 0) {
-      drawFrame(0);
-    }
+    if (framesRef.current.length > 0) drawFrame(0);
 
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
+    return () => { document.body.style.overflow = 'auto'; };
   }, [location.state, drawFrame]);
 
-  // Lock/unlock body scroll
+  // Lock/unlock body
   useEffect(() => {
     document.body.style.overflow = isAnimFinished ? 'auto' : 'hidden';
   }, [isAnimFinished]);
 
-  // Main scroll-driven animation engine
+  // ===== SCROLL-DRIVEN ENGINE (wheel + touch) =====
   useEffect(() => {
     const handleWheel = (e) => {
       if (isAnimFinished) return;
       const maxDelta = 80;
-      const clampedDeltaY = Math.max(-maxDelta, Math.min(maxDelta, e.deltaY));
-      const scrollAmount = clampedDeltaY * 0.0005; 
-      targetProgress.current = Math.max(0, Math.min(1.05, targetProgress.current + scrollAmount));
+      const clamped = Math.max(-maxDelta, Math.min(maxDelta, e.deltaY));
+      targetProgress.current = Math.max(0, Math.min(1.05, targetProgress.current + clamped * 0.0005));
     };
 
     const handleTouchStart = (e) => {
@@ -164,14 +144,10 @@ const Home = () => {
     const handleTouchMove = (e) => {
       if (isAnimFinished) return;
       e.preventDefault();
-      const currentTouchY = e.touches[0].clientY;
-      const deltaY = lastTouchY.current - currentTouchY;
-      lastTouchY.current = currentTouchY;
-      
-      const maxDelta = 40;
-      const clampedDelta = Math.max(-maxDelta, Math.min(maxDelta, deltaY));
-      const scrollAmount = clampedDelta * 0.001;
-      targetProgress.current = Math.max(0, Math.min(1.05, targetProgress.current + scrollAmount));
+      const deltaY = lastTouchY.current - e.touches[0].clientY;
+      lastTouchY.current = e.touches[0].clientY;
+      const clamped = Math.max(-40, Math.min(40, deltaY));
+      targetProgress.current = Math.max(0, Math.min(1.05, targetProgress.current + clamped * 0.001));
     };
 
     window.addEventListener('wheel', handleWheel, { passive: false });
@@ -181,21 +157,16 @@ const Home = () => {
     const smoothUpdate = () => {
       if (!isAnimFinished) {
         currentProgress.current += (targetProgress.current - currentProgress.current) * 0.03;
+        const p = Math.max(0, Math.min(1, currentProgress.current));
         
-        const renderProgress = Math.max(0, Math.min(1, currentProgress.current));
-        
-        setScrollProgress((prev) => {
-           if (Math.abs(prev - renderProgress) > 0.0005) return renderProgress;
-           return prev;
-        });
+        setScrollProgress((prev) => (Math.abs(prev - p) > 0.0005 ? p : prev));
 
         if (framesRef.current.length > 0 && frameCountRef.current > 0) {
-          const frameIndex = Math.round(renderProgress * (frameCountRef.current - 1));
-          drawFrame(frameIndex);
+          drawFrame(Math.round(p * (frameCountRef.current - 1)));
         }
 
         if (currentProgress.current >= 0.99 && targetProgress.current >= 1.0) {
-           setIsAnimFinished(true);
+          setIsAnimFinished(true);
         }
       }
       animationFrameId.current = requestAnimationFrame(smoothUpdate);
@@ -211,122 +182,108 @@ const Home = () => {
     };
   }, [isAnimFinished, drawFrame]);
 
-  // Re-lock if user scrolls back to very top
+  // Re-lock if scrolled back to top
   useEffect(() => {
-    const handleGlobalScroll = () => {
-       if (isAnimFinished && window.scrollY <= 5) {
-         setIsAnimFinished(false);
-         targetProgress.current = 0.98;
-         currentProgress.current = 0.98;
-         setScrollProgress(0.98);
-       }
-    };
-    window.addEventListener('scroll', handleGlobalScroll);
-    return () => window.removeEventListener('scroll', handleGlobalScroll);
-  }, [isAnimFinished]);
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (framesRef.current.length > 0) {
-        const frameIndex = Math.round(currentProgress.current * (frameCountRef.current - 1));
-        drawFrame(frameIndex);
+    const onScroll = () => {
+      if (isAnimFinished && window.scrollY <= 5) {
+        setIsAnimFinished(false);
+        targetProgress.current = 0.98;
+        currentProgress.current = 0.98;
+        setScrollProgress(0.98);
       }
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isAnimFinished]);
+
+  // Resize handler
+  useEffect(() => {
+    const onResize = () => {
+      if (framesRef.current.length > 0) {
+        drawFrame(Math.round(currentProgress.current * (frameCountRef.current - 1)));
+      }
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, [drawFrame]);
 
-  // Scroll-triggered animations for content below the hero
+  // Scroll-triggered animations for content below
   useEffect(() => {
     if (!isAnimFinished) return;
-    
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-visible'); observer.unobserve(e.target); } }),
       { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }
     );
-
-    const els = document.querySelectorAll('.scroll-fade-up, .scroll-fade-left, .scroll-fade-right, .scroll-scale-in');
-    els.forEach((el) => observer.observe(el));
-
+    document.querySelectorAll('.scroll-fade-up, .scroll-fade-left, .scroll-fade-right, .scroll-scale-in')
+      .forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, [isAnimFinished]);
 
-  // Phase calculator for hero text transitions
-  const calculatePhase = (start, end) => {
+  // Phase text calculator
+  const phase = (start, end) => {
     if (scrollProgress < start) return { opacity: 0, translateY: 80 };
     if (scrollProgress > end) return { opacity: 0, translateY: -80 };
-    
-    const range = end - start;
-    const p = (scrollProgress - start) / range;
-    
-    let opacity = 1;
-    if (p < 0.2) opacity = p * 5;
-    else if (p > 0.8) opacity = (1 - p) * 5;
-    
-    return { opacity: Math.max(0, Math.min(1, opacity)), translateY: 40 - (p * 80) };
+    const p = (scrollProgress - start) / (end - start);
+    let o = 1;
+    if (p < 0.2) o = p * 5;
+    else if (p > 0.8) o = (1 - p) * 5;
+    return { opacity: Math.max(0, Math.min(1, o)), translateY: 40 - p * 80 };
   };
 
-  const phase1 = calculatePhase(0.0, 0.25);
-  const phase2 = calculatePhase(0.25, 0.50);
-  const phase3 = calculatePhase(0.50, 0.75);
-  const phase4 = calculatePhase(0.75, 1.00);
+  const p1 = phase(0.0, 0.25);
+  const p2 = phase(0.25, 0.50);
+  const p3 = phase(0.50, 0.75);
+  const p4 = phase(0.75, 1.00);
+
+  const phaseStyle = (ph, clickable) => ({
+    position: 'absolute', top: '50%', left: '50%', width: '100%',
+    transform: `translate(-50%, calc(-50% + ${ph.translateY}px))`,
+    opacity: ph.opacity, pointerEvents: clickable ? 'auto' : 'none',
+  });
 
   return (
     <div>
-      {/* ===== SCROLL-LOCKED HERO ANIMATION ===== */}
-      <section ref={containerRef} style={{ position: 'relative', height: '100vh', overflow: 'hidden', backgroundColor: '#000' }}>
-        
-        {/* Static poster from video — shown while frames extract, NOT an animated file */}
-        <video 
-          src="/Lever_flipping,_LED_bulb_glowing_202606191155.mp4"
-          muted
-          playsInline
-          preload="auto"
-          style={{ 
-            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-            objectFit: 'cover', zIndex: 0, 
-            opacity: framesReady ? 0 : 1, transition: 'opacity 0.5s ease',
-            pointerEvents: 'none'
-          }} 
+      {/* ===== FULL-SCREEN SCROLL-LOCKED HERO ===== */}
+      <section
+        ref={containerRef}
+        style={{
+          position: 'relative',
+          width: '100vw',
+          height: '100vh',
+          margin: 0,
+          padding: 0,
+          overflow: 'hidden',
+          backgroundColor: '#000',
+        }}
+      >
+        {/* z-index: 0 — background canvas */}
+        <canvas
+          ref={canvasRef}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            display: 'block',
+            zIndex: 0,
+          }}
         />
 
-        {/* Canvas for frame-by-frame scrubbing */}
-        <canvas 
-          ref={canvasRef} 
-          style={{ 
-            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-            display: 'block', zIndex: 1, opacity: framesReady ? 1 : 0, transition: 'opacity 0.5s ease'
-          }} 
-        />
-        
-        {/* Gradient overlay */}
+        {/* z-index: 1 — gradient overlay */}
         <div style={{
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
           background: `linear-gradient(180deg, 
             rgba(10,10,12,${0.3 + scrollProgress * 0.7}) 0%, 
             rgba(10,10,12,${0.1 + scrollProgress * 0.6}) 40%,
-            rgba(10,10,12,${0.4 + scrollProgress * 0.6}) 100%
-          )`,
-          zIndex: 2
-        }}></div>
+            rgba(10,10,12,${0.4 + scrollProgress * 0.6}) 100%)`,
+          zIndex: 1,
+        }} />
         
-        <div className="hero" style={{ height: '100vh', position: 'relative', zIndex: 3, background: 'transparent' }}>
+        {/* z-index: 10 — all text content sits ON TOP */}
+        <div style={{ position: 'relative', height: '100vh', zIndex: 10 }}>
           
-          {/* Phase 1 */}
-          <div className="hero-content" style={{ 
-            position: 'absolute', top: '50%', left: '50%', 
-            transform: `translate(-50%, calc(-50% + ${phase1.translateY}px))`,
-            opacity: phase1.opacity, width: '100%',
-            pointerEvents: scrollProgress < 0.2 ? 'auto' : 'none'
-          }}>
+          <div className="hero-content" style={phaseStyle(p1, scrollProgress < 0.2)}>
             <h1 className="hero-title">
               <span className="text-gradient">Powering The Future, </span>
               <span className="text-accent">Brilliantly.</span>
@@ -338,36 +295,21 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Phase 2 */}
-          <div className="hero-content" style={{ 
-            position: 'absolute', top: '50%', left: '50%', 
-            transform: `translate(-50%, calc(-50% + ${phase2.translateY}px))`,
-            opacity: phase2.opacity, width: '100%', pointerEvents: 'none'
-          }}>
+          <div className="hero-content" style={phaseStyle(p2, false)}>
             <h1 className="hero-title" style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}>
               <span className="text-gradient">Uncompromising Quality.</span>
             </h1>
             <p className="hero-subtitle" style={{ color: '#fff' }}>We engineer reliable, high-performance energy systems designed to last a lifetime.</p>
           </div>
 
-          {/* Phase 3 */}
-          <div className="hero-content" style={{ 
-            position: 'absolute', top: '50%', left: '50%', 
-            transform: `translate(-50%, calc(-50% + ${phase3.translateY}px))`,
-            opacity: phase3.opacity, width: '100%', pointerEvents: 'none'
-          }}>
+          <div className="hero-content" style={phaseStyle(p3, false)}>
             <h1 className="hero-title" style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}>
               <span className="text-accent">Smart</span> Home Ready.
             </h1>
             <p className="hero-subtitle" style={{ color: '#fff' }}>Seamless integration with the latest automated technology.</p>
           </div>
 
-          {/* Phase 4 */}
-          <div className="hero-content" style={{ 
-            position: 'absolute', top: '50%', left: '50%', 
-            transform: `translate(-50%, calc(-50% + ${phase4.translateY}px))`,
-            opacity: phase4.opacity, width: '100%', pointerEvents: 'none'
-          }}>
+          <div className="hero-content" style={phaseStyle(p4, false)}>
             <h1 className="hero-title" style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}>
               <span className="text-gradient">Industrial Grade </span>
               <span className="text-accent">Power.</span>
@@ -375,14 +317,14 @@ const Home = () => {
             <p className="hero-subtitle" style={{ color: '#fff' }}>The backbone your business needs to thrive.</p>
           </div>
 
-          {/* Scroll hint */}
+          {/* Scroll hint — z-index: 10 on top of everything */}
           <div style={{
             position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
             opacity: scrollProgress < 0.05 ? 1 : 0, transition: 'opacity 0.5s ease',
-            textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem',
+            textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', zIndex: 10,
           }}>
             <div style={{ width: '24px', height: '40px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '12px', margin: '0 auto 0.5rem', position: 'relative' }}>
-              <div style={{ width: '4px', height: '8px', backgroundColor: 'var(--accent-amber)', borderRadius: '2px', position: 'absolute', top: '6px', left: '50%', transform: 'translateX(-50%)', animation: 'pulse 2s ease-in-out infinite' }}></div>
+              <div style={{ width: '4px', height: '8px', backgroundColor: 'var(--accent-amber)', borderRadius: '2px', position: 'absolute', top: '6px', left: '50%', transform: 'translateX(-50%)', animation: 'pulse 2s ease-in-out infinite' }} />
             </div>
             Scroll to explore
           </div>
@@ -392,7 +334,6 @@ const Home = () => {
       {/* ===== MAIN CONTENT ===== */}
       <div style={{ position: 'relative', zIndex: 10, backgroundColor: 'var(--bg-dark)' }}>
         
-        {/* Why Choose Section */}
         <section className="section container">
           <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <h2 className="responsive-heading">Why Choose <span className="text-accent">Lumina</span></h2>
@@ -417,7 +358,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Featured Image Banner */}
         <section className="image-banner scroll-scale-in">
           <img src="/electrician-panel.png" alt="Electrician working on panel" />
           <div className="image-banner-overlay"></div>
@@ -427,7 +367,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Stats Section */}
         <section className="section" style={{ backgroundColor: 'rgba(245, 158, 11, 0.05)', borderTop: '1px solid var(--border-glass)', borderBottom: '1px solid var(--border-glass)' }}>
           <div className="container">
             <div className="stats-grid">
@@ -439,7 +378,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Our Story Section */}
         <section className="section container">
           <div className="story-grid">
             <div className="scroll-fade-left">
@@ -481,7 +419,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Smart Home Image Banner */}
         <section className="image-banner scroll-scale-in">
           <img src="/smart-home.png" alt="Smart home interior lighting" />
           <div className="image-banner-overlay"></div>
@@ -491,7 +428,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Process Section */}
         <section className="section container">
           <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <p style={{ color: 'var(--accent-amber)', fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>How We Work</p>
@@ -513,7 +449,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Testimonials */}
         <section className="section" style={{ backgroundColor: 'rgba(245, 158, 11, 0.03)', borderTop: '1px solid var(--border-glass)', borderBottom: '1px solid var(--border-glass)' }}>
           <div className="container">
             <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '4rem' }}>
@@ -539,7 +474,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Industrial Image Banner */}
         <section className="image-banner scroll-scale-in">
           <img src="/industrial-power.png" alt="Industrial power systems" />
           <div className="image-banner-overlay"></div>
@@ -549,7 +483,6 @@ const Home = () => {
           </div>
         </section>
         
-        {/* CTA Banner */}
         <section className="section">
           <div className="container">
             <div className="glass-panel cta-banner scroll-fade-up">
