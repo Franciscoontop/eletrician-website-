@@ -292,7 +292,7 @@ const Home = () => {
         {/* z-index: 0 — fallback video for mobile Safari */}
         <video
           ref={videoRef}
-          src="/Lever_flipping,_LED_bulb_glowing_202606191155.mp4"
+          src={window.innerWidth < 768 ? "/new png 720x12980 light bulb.mp4" : "/Lever_flipping,_LED_bulb_glowing_202606191155.mp4"}
           muted
           playsInline
           autoPlay
@@ -305,7 +305,7 @@ const Home = () => {
             width: '100vw',
             height: '100vh',
             objectFit: 'cover',
-            objectPosition: '75% 50%',
+            objectPosition: window.innerWidth < 768 ? '50% 50%' : '75% 50%',
             display: isVideoFallback ? 'block' : 'none',
             zIndex: 0,
           }}
