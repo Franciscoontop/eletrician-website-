@@ -71,7 +71,9 @@ const Home = () => {
         setIsVideoFallback(true);
         
         try {
-          const res = await fetch('/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
+          const isMobile = window.innerWidth < 768;
+          const mp4Asset = isMobile ? '/mobile-video.mp4' : '/Lever_flipping,_LED_bulb_glowing_202606191155.mp4';
+          const res = await fetch(mp4Asset);
           const blob = await res.blob();
           const videoUrl = URL.createObjectURL(blob);
           
@@ -93,7 +95,11 @@ const Home = () => {
       }
 
       try {
-        const response = await fetch('/lightbulb.webp');
+        // Detect if user is on mobile (screen width less than 768px)
+        const isMobile = window.innerWidth < 768;
+        const webpAsset = isMobile ? '/mobile-lightbulb.webp' : '/lightbulb.webp';
+        
+        const response = await fetch(webpAsset);
         const blob = await response.blob();
         const arrayBuffer = await blob.arrayBuffer();
         
@@ -134,7 +140,10 @@ const Home = () => {
         setIsVideoFallback(true);
         
         try {
-          const res = await fetch('/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
+          const isMobile = window.innerWidth < 768;
+          const mp4Asset = isMobile ? '/mobile-video.mp4' : '/Lever_flipping,_LED_bulb_glowing_202606191155.mp4';
+          
+          const res = await fetch(mp4Asset);
           const blob = await res.blob();
           const videoUrl = URL.createObjectURL(blob);
           if (videoRef.current) {
