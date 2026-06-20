@@ -190,7 +190,7 @@ function injectStyles() {
       flex: 1; padding: 10px 14px;
       background: #1a1a1a; border: 1px solid #444;
       color: #fff; border-radius: 22px; outline: none;
-      font-size: max(16px, 14px);
+      font-size: 16px;
     }
     .ai-send-btn {
       padding: 10px 16px; background: #fff; color: #000;
