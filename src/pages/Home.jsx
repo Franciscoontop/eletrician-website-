@@ -57,7 +57,7 @@ const Home = () => {
     ctx.drawImage(bitmap, x, y, bitmap.width * scale, bitmap.height * scale);
   }, []);
 
-  // ===== EXTRACT MP4 FRAMES INTO MEMORY =====
+  // ===== EXTRACT MP4 FRAMES BY PLAYING VIDEO =====
   useEffect(() => {
     let cancelled = false;
 
@@ -66,17 +66,6 @@ const Home = () => {
       drawFrame(0);
       return;
     }
-
-    const seekTo = (video, time) => {
-      return new Promise((resolve) => {
-        const onSeeked = () => {
-          video.removeEventListener('seeked', onSeeked);
-          resolve();
-        };
-        video.addEventListener('seeked', onSeeked);
-        video.currentTime = time;
-      });
-    };
 
     const extractFrames = async () => {
       try {
@@ -92,46 +81,39 @@ const Home = () => {
           video.load();
         });
 
-        const fps = 24;
-        const duration = video.duration;
-        const totalFrames = Math.ceil(duration * fps);
-        frameCountRef.current = totalFrames;
-        
         const frames = [];
         const offscreen = document.createElement('canvas');
         const offCtx = offscreen.getContext('2d');
         offscreen.width = video.videoWidth;
         offscreen.height = video.videoHeight;
 
-        for (let i = 0; i < totalFrames; i++) {
-          if (cancelled) return;
+        // Play at 3x speed so extraction is fast
+        video.playbackRate = 3;
+        await video.play();
 
-          const targetTime = i / fps;
-          if (i === 0 && video.currentTime === 0) {
-            // Already at frame 0, no seek needed
-          } else {
-            await seekTo(video, targetTime);
-          }
-          
+        // Capture frames as the video plays naturally
+        while (!video.ended && !video.paused && !cancelled) {
           offCtx.drawImage(video, 0, 0, offscreen.width, offscreen.height);
           const bitmap = await createImageBitmap(offscreen);
           frames.push(bitmap);
 
-          // Show first frame on canvas immediately
-          if (i === 0 && !cancelled) {
+          if (frames.length === 1) {
             framesRef.current = frames;
+            frameCountRef.current = 1;
             drawFrame(0);
           }
+
+          // Wait for the next animation frame
+          await new Promise((r) => requestAnimationFrame(r));
         }
 
-        if (!cancelled) {
+        if (!cancelled && frames.length > 0) {
           framesRef.current = frames;
           frameCountRef.current = frames.length;
           setFramesReady(true);
           drawFrame(0);
-          console.log(`✅ Extracted ${frames.length} frames from video`);
+          console.log(`Extracted ${frames.length} frames`);
         }
-
       } catch (err) {
         console.error('Frame extraction failed:', err);
       }
