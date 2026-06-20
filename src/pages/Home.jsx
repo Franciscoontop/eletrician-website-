@@ -3,142 +3,56 @@ import { Link, useLocation } from 'react-router-dom';
 import { Shield, Zap, Wrench, CheckCircle, Clock, Award, Star, Heart, ArrowRight } from 'lucide-react';
 
 const Home = () => {
-  const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const location = useLocation();
   
   const [isAnimFinished, setIsAnimFinished] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [framesReady, setFramesReady] = useState(false);
-  const [isVideoFallback, setIsVideoFallback] = useState(false);
+  const [isVideoReady, setIsVideoReady] = useState(false);
 
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
   const animationFrameId = useRef(null);
-  const framesRef = useRef([]); 
-  const frameCountRef = useRef(0);
   const lastTouchY = useRef(0);
   const videoRef = useRef(null);
 
-  // ===== DRAW FRAME TO CANVAS (object-fit: cover) =====
-  const drawFrame = useCallback((frameIndex) => {
-    const canvas = canvasRef.current;
-    const frames = framesRef.current;
-    if (!canvas || !frames.length) return;
-    
-    const idx = Math.max(0, Math.min(frames.length - 1, Math.round(frameIndex)));
-    const bitmap = frames[idx];
-    if (!bitmap) return;
-    
-    const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    
-    if (canvas.width !== vw * dpr || canvas.height !== vh * dpr) {
-      canvas.width = vw * dpr;
-      canvas.height = vh * dpr;
-      canvas.style.width = vw + 'px';
-      canvas.style.height = vh + 'px';
-      ctx.scale(dpr, dpr);
-    }
-    
-    // object-fit: cover — always fills viewport, crops overflow
-    const scale = Math.max(vw / bitmap.width, vh / bitmap.height);
-    const x = (vw - bitmap.width * scale) / 2;
-    const y = (vh - bitmap.height * scale) / 2;
-    
-    ctx.clearRect(0, 0, vw, vh);
-    ctx.drawImage(bitmap, x, y, bitmap.width * scale, bitmap.height * scale);
-  }, []);
-
-  // ===== EXTRACT FRAMES FROM ANIMATED WEBP VIA ImageDecoder =====
+  // ===== VIDEO ENGINE INITIALIZATION & iOS UNLOCK HACK =====
   useEffect(() => {
     let cancelled = false;
 
-    if (framesRef.current.length > 0 || isVideoFallback) {
-      setFramesReady(true);
-      if (!isVideoFallback) drawFrame(0);
-      return;
+    if (videoRef.current) {
+      videoRef.current.load();
+      
+      const onCanPlay = () => {
+        if (!cancelled) setIsVideoReady(true);
+      };
+      videoRef.current.addEventListener('canplaythrough', onCanPlay);
+      videoRef.current.addEventListener('loadeddata', onCanPlay);
+
+      // --- iOS Safari Touch Unlock Hack ---
+      const unlockVideo = () => {
+        if (videoRef.current) {
+          videoRef.current.play().then(() => {
+            if (videoRef.current) videoRef.current.pause();
+          }).catch(() => {});
+        }
+        window.removeEventListener('touchstart', unlockVideo);
+      };
+      window.addEventListener('touchstart', unlockVideo);
+      
+      // Fallback timeout
+      setTimeout(() => { if (!cancelled) setIsVideoReady(true); }, 1500);
+
+      return () => {
+        cancelled = true;
+        if (videoRef.current) {
+          videoRef.current.removeEventListener('canplaythrough', onCanPlay);
+          videoRef.current.removeEventListener('loadeddata', onCanPlay);
+        }
+        window.removeEventListener('touchstart', unlockVideo);
+      };
     }
-
-    const extractFrames = async () => {
-      if (!window.ImageDecoder) {
-        console.warn('ImageDecoder not supported. Falling back to simple video element.');
-        setIsVideoFallback(true);
-        setFramesReady(true);
-        
-        const unlockVideo = () => {
-          if (videoRef.current) {
-            videoRef.current.play().then(() => videoRef.current.pause()).catch(() => {});
-          }
-          window.removeEventListener('touchstart', unlockVideo);
-        };
-        window.addEventListener('touchstart', unlockVideo);
-        
-        return;
-      }
-
-      try {
-        const isMobile = window.innerWidth < 768;
-        let response = await fetch(isMobile ? '/light bulb video 720x1280.webp' : '/lightbulb.webp');
-        if (!response.ok) {
-           response = await fetch('/lightbulb.webp');
-        }
-
-        const blob = await response.blob();
-        const arrayBuffer = await blob.arrayBuffer();
-        
-        const decoder = new ImageDecoder({
-          type: 'image/webp',
-          data: arrayBuffer,
-        });
-
-        await decoder.tracks.ready;
-        const totalFrames = decoder.tracks.selectedTrack.frameCount;
-        frameCountRef.current = totalFrames;
-
-        const extractedFrames = [];
-        
-        for (let i = 0; i < totalFrames; i++) {
-          if (cancelled) return;
-          const result = await decoder.decode({ frameIndex: i });
-          const bitmap = await createImageBitmap(result.image);
-          extractedFrames.push(bitmap);
-          result.image.close();
-          
-          if (i === 0 && !cancelled) {
-            framesRef.current = extractedFrames;
-            drawFrame(0);
-          }
-        }
-        
-        framesRef.current = extractedFrames;
-        
-        if (!cancelled) {
-          setFramesReady(true);
-          drawFrame(0);
-        }
-        
-        decoder.close();
-      } catch (err) {
-        console.error('Frame extraction failed, falling back to simple video element:', err);
-        setIsVideoFallback(true);
-        setFramesReady(true);
-        
-        const unlockVideo = () => {
-          if (videoRef.current) {
-            videoRef.current.play().then(() => videoRef.current.pause()).catch(() => {});
-          }
-          window.removeEventListener('touchstart', unlockVideo);
-        };
-        window.addEventListener('touchstart', unlockVideo);
-      }
-    };
-
-    extractFrames();
-    return () => { cancelled = true; };
-  }, [drawFrame, isVideoFallback]);
+  }, []);
 
   // ===== RESET ON HOME/LOGO CLICK =====
   useEffect(() => {
@@ -148,12 +62,10 @@ const Home = () => {
     setScrollProgress(0);
     targetProgress.current = 0;
     currentProgress.current = 0;
-    
-    if (framesRef.current.length > 0) drawFrame(0);
     if (videoRef.current) videoRef.current.currentTime = 0;
 
     return () => { document.body.style.overflow = 'auto'; };
-  }, [location.state, drawFrame]);
+  }, [location.state]);
 
   // Lock/unlock body
   useEffect(() => {
@@ -194,9 +106,7 @@ const Home = () => {
         
         setScrollProgress((prev) => (Math.abs(prev - p) > 0.0005 ? p : prev));
 
-        if (!isVideoFallback && framesRef.current.length > 0 && frameCountRef.current > 0) {
-          drawFrame(Math.round(p * (frameCountRef.current - 1)));
-        } else if (isVideoFallback && videoRef.current) {
+        if (videoRef.current) {
           const duration = videoRef.current.duration || 3;
           videoRef.current.currentTime = p * duration;
         }
@@ -216,7 +126,7 @@ const Home = () => {
       window.removeEventListener('touchmove', handleTouchMove);
       if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     };
-  }, [isAnimFinished, drawFrame]);
+  }, [isAnimFinished]);
 
   // Re-lock if scrolled back to top
   useEffect(() => {
@@ -231,17 +141,6 @@ const Home = () => {
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, [isAnimFinished]);
-
-  // Resize handler
-  useEffect(() => {
-    const onResize = () => {
-      if (framesRef.current.length > 0) {
-        drawFrame(Math.round(currentProgress.current * (frameCountRef.current - 1)));
-      }
-    };
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, [drawFrame]);
 
   // Scroll-triggered animations for content below
   useEffect(() => {
@@ -292,24 +191,10 @@ const Home = () => {
           backgroundColor: '#000',
         }}
       >
-        {/* z-index: 0 — background canvas */}
-        <canvas
-          ref={canvasRef}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            display: isVideoFallback ? 'none' : 'block',
-            zIndex: 0,
-          }}
-        />
-
-        {/* z-index: 0 — fallback video for mobile Safari */}
+        {/* z-index: 0 — native video engine */}
         <video
           ref={videoRef}
-          src={window.innerWidth < 768 ? "/new png 720x12980 light bulb.mp4" : "/Lever_flipping,_LED_bulb_glowing_202606191155.mp4"}
+          src={window.innerWidth < 768 ? "/new png 720x12980 light bulb.mp4" : "/new destktop light bulb aniamtion.mp4"}
           muted
           playsInline
           preload="auto"
@@ -320,9 +205,11 @@ const Home = () => {
             width: '100vw',
             height: '100vh',
             objectFit: 'cover',
-            objectPosition: window.innerWidth < 768 ? '50% 50%' : '75% 50%',
-            display: isVideoFallback ? 'block' : 'none',
+            objectPosition: '50% 50%',
+            display: 'block',
             zIndex: 0,
+            opacity: isVideoReady ? 1 : 0,
+            transition: 'opacity 0.5s ease-in-out'
           }}
         />
 
