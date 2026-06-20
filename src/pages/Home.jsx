@@ -67,6 +67,15 @@ const Home = () => {
         console.warn('ImageDecoder not supported. Falling back to simple video element.');
         setIsVideoFallback(true);
         setFramesReady(true);
+        
+        const unlockVideo = () => {
+          if (videoRef.current) {
+            videoRef.current.play().then(() => videoRef.current.pause()).catch(() => {});
+          }
+          window.removeEventListener('touchstart', unlockVideo);
+        };
+        window.addEventListener('touchstart', unlockVideo);
+        
         return;
       }
 
@@ -116,6 +125,14 @@ const Home = () => {
         console.error('Frame extraction failed, falling back to simple video element:', err);
         setIsVideoFallback(true);
         setFramesReady(true);
+        
+        const unlockVideo = () => {
+          if (videoRef.current) {
+            videoRef.current.play().then(() => videoRef.current.pause()).catch(() => {});
+          }
+          window.removeEventListener('touchstart', unlockVideo);
+        };
+        window.addEventListener('touchstart', unlockVideo);
       }
     };
 
@@ -295,8 +312,6 @@ const Home = () => {
           src={window.innerWidth < 768 ? "/new png 720x12980 light bulb.mp4" : "/Lever_flipping,_LED_bulb_glowing_202606191155.mp4"}
           muted
           playsInline
-          autoPlay
-          onPlay={() => { if (videoRef.current) videoRef.current.pause(); }}
           preload="auto"
           style={{
             position: 'absolute',
