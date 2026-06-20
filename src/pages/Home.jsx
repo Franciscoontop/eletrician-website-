@@ -10,7 +10,9 @@ const Home = () => {
   const [isAnimFinished, setIsAnimFinished] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [framesReady, setFramesReady] = useState(false);
-  const [isVideoFallback, setIsVideoFallback] = useState(false);
+  const [isVideoFallback, setIsVideoFallback] = useState(() => {
+    return window.innerWidth < 768 || typeof window.ImageDecoder === 'undefined';
+  });
 
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
@@ -69,6 +71,11 @@ const Home = () => {
         setIsVideoFallback(true);
         setFramesReady(true);
         
+        if (videoRef.current) {
+          videoRef.current.load();
+          videoRef.current.currentTime = 0.01;
+        }
+
         const unlockVideo = () => {
           if (videoRef.current) {
             videoRef.current.play().then(() => {
