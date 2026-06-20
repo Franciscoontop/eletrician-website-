@@ -63,44 +63,35 @@ const Home = () => {
     }
 
     const extractFrames = async () => {
-      // Mobile Safari / Firefox don't support ImageDecoder.
-      // Fallback directly to scrubbing the MP4 video element.
-      // We fetch it as a Blob first so iOS Safari can scrub it flawlessly without network/range-request issues.
       if (!window.ImageDecoder) {
         console.warn('ImageDecoder not supported. Falling back to video Blob scrubbing.');
         setIsVideoFallback(true);
         
         try {
           const isMobile = window.innerWidth < 768;
-          const mp4Asset = isMobile ? '/mobile-video.mp4' : '/Lever_flipping,_LED_bulb_glowing_202606191155.mp4';
-          const res = await fetch(mp4Asset);
+          let res = await fetch(isMobile ? '/mobile-video.mp4' : '/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
+          if (!res.ok) res = await fetch('/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
+          
           const blob = await res.blob();
           const videoUrl = URL.createObjectURL(blob);
           
           if (videoRef.current) {
             videoRef.current.src = videoUrl;
-            videoRef.current.onloadeddata = () => {
-              // Once the first frame is ready, show it
-              setFramesReady(true);
-            };
             videoRef.current.load();
-          } else {
-             setFramesReady(true);
           }
         } catch (e) {
           console.error('Video fetch failed:', e);
-          setFramesReady(true);
         }
+        
+        // Always show the video element immediately so we don't get a black screen
+        setFramesReady(true);
         return;
       }
 
       try {
-        // Attempt to use mobile files if they exist, otherwise fallback to the desktop files.
         const isMobile = window.innerWidth < 768;
-        
         let response = await fetch(isMobile ? '/mobile-lightbulb.webp' : '/lightbulb.webp');
         if (!response.ok) {
-           // If mobile file is missing, fallback to desktop file
            response = await fetch('/lightbulb.webp');
         }
 
@@ -147,7 +138,6 @@ const Home = () => {
           const isMobile = window.innerWidth < 768;
           let res = await fetch(isMobile ? '/mobile-video.mp4' : '/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
           if (!res.ok) {
-             // If mobile file is missing, fallback to desktop file
              res = await fetch('/Lever_flipping,_LED_bulb_glowing_202606191155.mp4');
           }
           
@@ -155,14 +145,14 @@ const Home = () => {
           const videoUrl = URL.createObjectURL(blob);
           if (videoRef.current) {
             videoRef.current.src = videoUrl;
-            videoRef.current.onloadeddata = () => setFramesReady(true);
             videoRef.current.load();
-          } else {
-            setFramesReady(true);
           }
         } catch(e) {
-          setFramesReady(true);
+          console.error(e);
         }
+        
+        // Show video element immediately
+        setFramesReady(true);
       }
     };
 
