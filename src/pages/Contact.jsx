@@ -5,7 +5,8 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    service: 'residential',
+    propertyType: 'residential',
+    service: 'panel_upgrade',
     message: ''
   });
 
@@ -17,7 +18,7 @@ const Contact = () => {
     e.preventDefault();
     // Simulate form submission
     alert('Thank you for reaching out! We will contact you shortly.');
-    setFormData({ name: '', email: '', service: 'residential', message: '' });
+    setFormData({ name: '', email: '', propertyType: 'residential', service: 'panel_upgrade', message: '' });
   };
 
   return (
@@ -33,7 +34,7 @@ const Contact = () => {
         <div className="contact-page-grid">
           
           <div className="glass-panel" style={{ padding: '3rem 2rem' }}>
-            <h3 style={{ fontSize: '1.8rem', marginBottom: '2rem', color: '#fff' }}>Contact Information</h3>
+            <h3 style={{ fontSize: '1.8rem', marginBottom: '2rem', color: 'var(--text-main)' }}>Contact Information</h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <div style={{ display: 'flex', gap: '1rem' }}>
@@ -41,7 +42,7 @@ const Contact = () => {
                   <Phone size={24} />
                 </div>
                 <div>
-                  <h4 style={{ fontSize: '1.1rem', marginBottom: '0.2rem', color: '#fff' }}>Call Us</h4>
+                  <h4 style={{ fontSize: '1.1rem', marginBottom: '0.2rem', color: 'var(--text-main)' }}>Call Us</h4>
                   <p style={{ color: 'var(--text-muted)' }}>1-800-LUMINA-E</p>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Mon-Fri: 8am - 6pm</p>
                 </div>
@@ -52,7 +53,7 @@ const Contact = () => {
                   <Mail size={24} />
                 </div>
                 <div>
-                  <h4 style={{ fontSize: '1.1rem', marginBottom: '0.2rem', color: '#fff' }}>Email Us</h4>
+                  <h4 style={{ fontSize: '1.1rem', marginBottom: '0.2rem', color: 'var(--text-main)' }}>Email Us</h4>
                   <p style={{ color: 'var(--text-muted)' }}>info@luminaelectrical.com</p>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>24/7 online support</p>
                 </div>
@@ -63,7 +64,7 @@ const Contact = () => {
                   <MapPin size={24} />
                 </div>
                 <div>
-                  <h4 style={{ fontSize: '1.1rem', marginBottom: '0.2rem', color: '#fff' }}>Visit Us</h4>
+                  <h4 style={{ fontSize: '1.1rem', marginBottom: '0.2rem', color: 'var(--text-main)' }}>Visit Us</h4>
                   <p style={{ color: 'var(--text-muted)' }}>123 Power Avenue,</p>
                   <p style={{ color: 'var(--text-muted)' }}>Spark City, SC 90210</p>
                 </div>
@@ -72,7 +73,7 @@ const Contact = () => {
           </div>
 
           <div className="glass-panel" style={{ padding: '3rem' }}>
-            <h3 style={{ fontSize: '1.8rem', marginBottom: '2rem', color: '#fff' }}>Send a Message</h3>
+            <h3 style={{ fontSize: '1.8rem', marginBottom: '2rem', color: 'var(--text-main)' }}>Send a Message</h3>
             
             <form className="contact-form" onSubmit={handleSubmit}>
               <div className="contact-form-row">
@@ -104,23 +105,41 @@ const Contact = () => {
                   />
                 </div>
               </div>
+              <div className="contact-form-row">
+                <div className="form-group">
+                  <label className="form-label" htmlFor="propertyType">Property Type</label>
+                  <select 
+                    id="propertyType" 
+                    name="propertyType" 
+                    className="form-input" 
+                    value={formData.propertyType} 
+                    onChange={handleChange}
+                    style={{ appearance: 'none', backgroundColor: '#fff', color: '#111827' }}
+                  >
+                    <option value="residential">Residential</option>
+                    <option value="commercial">Commercial</option>
+                    <option value="industrial">Industrial</option>
+                  </select>
+                </div>
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="service">Service Required</label>
-                <select 
-                  id="service" 
-                  name="service" 
-                  className="form-input" 
-                  value={formData.service} 
-                  onChange={handleChange}
-                  style={{ appearance: 'none', backgroundColor: 'rgba(0,0,0,0.4)' }}
-                >
-                  <option value="residential">Residential Service</option>
-                  <option value="commercial">Commercial Service</option>
-                  <option value="industrial">Industrial Service</option>
-                  <option value="emergency">Emergency Repair</option>
-                  <option value="other">Other</option>
-                </select>
+                <div className="form-group">
+                  <label className="form-label" htmlFor="service">Service Needed</label>
+                  <select 
+                    id="service" 
+                    name="service" 
+                    className="form-input" 
+                    value={formData.service} 
+                    onChange={handleChange}
+                    style={{ appearance: 'none', backgroundColor: '#fff', color: '#111827' }}
+                  >
+                    <option value="panel_upgrade">Panel Upgrade</option>
+                    <option value="emergency">Emergency Repair</option>
+                    <option value="lighting">Lighting Installation</option>
+                    <option value="rewiring">Full/Partial Rewiring</option>
+                    <option value="ev_charger">EV Charger Installation</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
               </div>
 
               <div className="form-group">

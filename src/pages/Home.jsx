@@ -381,6 +381,20 @@ const Home = () => {
       {/* ===== MAIN CONTENT ===== */}
       <div style={{ position: 'relative', zIndex: 10, backgroundColor: 'var(--bg-dark)' }}>
         
+        {/* Trust Row - High Converting */}
+        <div className="container scroll-fade-up" style={{ marginTop: '-40px', position: 'relative', zIndex: 20 }}>
+          <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'center', gap: '3rem', flexWrap: 'wrap', backgroundColor: '#ffffff', boxShadow: '0 10px 40px rgba(0,0,0,0.08)', borderRadius: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#111827' }}>
+              <span style={{ fontSize: '1.2rem' }}>⚡</span> 24/7 Emergency Dispatch
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#111827' }}>
+              <span style={{ fontSize: '1.2rem' }}>🛡️</span> 100% Licensed & Insured
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#111827' }}>
+              <span style={{ fontSize: '1.2rem' }}>📋</span> NEC & OSHA Code Compliant
+            </div>
+          </div>
+        </div>
         <section className="section container">
           <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <h2 className="responsive-heading">Why Choose <span className="text-accent">Lumina</span></h2>
@@ -405,21 +419,23 @@ const Home = () => {
           </div>
         </section>
 
-        <section className="image-banner scroll-scale-in">
-          <img src="/electrician-panel.png" alt="Electrician working on panel" />
-          <div className="image-banner-overlay"></div>
-          <div className="image-banner-content">
-            <h2 className="responsive-heading">Precision in <span className="text-accent">Every Connection</span></h2>
-            <p>Our team brings decades of experience to every project, no matter the scale.</p>
+        <section className="section container">
+          <div className="image-wrapper scroll-scale-in" style={{ height: '50vh', minHeight: '400px' }}>
+            <img src="/electrician-panel.png" alt="Electrician working on panel" />
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(180deg, rgba(17,24,39,0.7) 0%, rgba(17,24,39,0.3) 50%, rgba(17,24,39,0.8) 100%)', zIndex: 1 }}></div>
+            <div className="image-banner-content" style={{ zIndex: 2 }}>
+              <h2 className="responsive-heading" style={{ color: '#fff' }}>Precision in <span className="text-accent">Every Connection</span></h2>
+              <p style={{ color: '#e5e7eb' }}>Our team brings decades of experience to every project, no matter the scale.</p>
+            </div>
           </div>
         </section>
 
         <section className="section" style={{ backgroundColor: 'rgba(245, 158, 11, 0.05)', borderTop: '1px solid var(--border-glass)', borderBottom: '1px solid var(--border-glass)' }}>
           <div className="container">
             <div className="stats-grid">
-              <div className="scroll-fade-up stagger-1"><h3 className="stat-number">15+</h3><p className="stat-label">Years Experience</p></div>
+              <div className="scroll-fade-up stagger-1"><h3 className="stat-number">10+</h3><p className="stat-label">Licensed Electricians</p></div>
               <div className="scroll-fade-up stagger-2"><h3 className="stat-number">2.5k</h3><p className="stat-label">Projects Completed</p></div>
-              <div className="scroll-fade-up stagger-3"><h3 className="stat-number">100%</h3><p className="stat-label">Safety Record</p></div>
+              <div className="scroll-fade-up stagger-3"><h3 className="stat-number">100%</h3><p className="stat-label">Code Compliance</p></div>
               <div className="scroll-fade-up stagger-4"><h3 className="stat-number">24/7</h3><p className="stat-label">Emergency Support</p></div>
             </div>
           </div>
@@ -466,12 +482,25 @@ const Home = () => {
           </div>
         </section>
 
-        <section className="image-banner scroll-scale-in">
-          <img src="/smart-home.png" alt="Smart home interior lighting" />
-          <div className="image-banner-overlay"></div>
-          <div className="image-banner-content">
-            <h2 className="responsive-heading">Smart <span className="text-accent">Lighting</span> Solutions</h2>
-            <p>Transform any space into a modern, energy-efficient masterpiece.</p>
+        <section className="section container">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
+            <div style={{ position: 'relative', width: '100%', paddingBottom: '3rem', paddingRight: '2rem' }}>
+              <div className="image-wrapper scroll-scale-in" style={{ width: '85%', zIndex: 1 }}>
+                <img src="/smart-home.png" alt="Smart home interior lighting" style={{ aspectRatio: '4/5' }} />
+              </div>
+              <div className="image-wrapper scroll-fade-up" style={{ width: '55%', position: 'absolute', bottom: 0, right: 0, zIndex: 2, padding: '4px' }}>
+                <img src="/electrician-panel.png" alt="Electrician detail" style={{ aspectRatio: '1/1' }} />
+              </div>
+            </div>
+            <div className="scroll-fade-left">
+              <h2 className="responsive-heading">Smart <span className="text-accent">Lighting</span> Solutions</h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginBottom: '1.5rem' }}>Transform any space into a modern, energy-efficient masterpiece with our custom smart integrations.</p>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', color: 'var(--text-muted)' }}>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><CheckCircle size={18} color="var(--accent-amber)" /> Complete Automation Control</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><CheckCircle size={18} color="var(--accent-amber)" /> Energy Efficiency Optimization</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><CheckCircle size={18} color="var(--accent-amber)" /> Voice & App Integration</li>
+              </ul>
+            </div>
           </div>
         </section>
 

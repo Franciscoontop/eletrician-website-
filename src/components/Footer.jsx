@@ -13,6 +13,9 @@ const Footer = () => {
           <p style={{ color: 'var(--text-muted)' }}>
             Premium electrical services for modern homes and businesses. Illuminating your world with precision and expertise.
           </p>
+          <p style={{ color: 'var(--text-muted)', marginTop: '1rem', fontWeight: 500 }}>
+            Proudly serving residential and commercial properties across Spark City and surrounding communities.
+          </p>
         </div>
         
         <div>

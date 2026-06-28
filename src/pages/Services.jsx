@@ -19,12 +19,12 @@ const Services = () => {
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', color: 'var(--accent-amber)' }}>
                 <HomeIcon size={32} />
-                <h2 style={{ fontSize: '2rem', color: '#fff' }}>Residential Solutions</h2>
+                <h2 style={{ fontSize: '2rem', color: 'var(--text-main)' }}>Residential Solutions</h2>
               </div>
               <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '1.05rem' }}>
                 Transform your home with cutting-edge electrical setups. We specialize in smart home integration, custom lighting designs, breaker panel upgrades, and seamless rewiring to keep your sanctuary safe and stunning.
               </p>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem', color: '#ddd' }}>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem', color: 'var(--text-muted)' }}>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Custom LED Lighting Design</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Smart Home Automation Integration</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Panel Upgrades & Replacements</li>
@@ -34,23 +34,25 @@ const Services = () => {
                 <Link to="/contact" className="btn-secondary">Book Residential Service</Link>
               </div>
             </div>
-            <div style={{ borderRadius: '12px', overflow: 'hidden', minHeight: '300px', backgroundImage: 'url(/residential.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+            <div className="image-wrapper" style={{ display: 'flex', minHeight: '300px' }}>
+              <img src="/residential.png" alt="Residential Services" />
             </div>
           </div>
 
           {/* Commercial */}
           <div className="glass-panel service-page-grid">
-            <div style={{ borderRadius: '12px', overflow: 'hidden', minHeight: '300px', backgroundImage: 'url(https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2000&auto=format&fit=crop)', backgroundSize: 'cover', backgroundPosition: 'center', border: '1px solid var(--border-glass)' }}>
+            <div className="image-wrapper" style={{ display: 'flex', minHeight: '300px' }}>
+              <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2000&auto=format&fit=crop" alt="Commercial Systems" />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', color: 'var(--accent-amber)' }}>
                 <Cpu size={32} />
-                <h2 style={{ fontSize: '2rem', color: '#fff' }}>Commercial Systems</h2>
+                <h2 style={{ fontSize: '2rem', color: 'var(--text-main)' }}>Commercial Systems</h2>
               </div>
               <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '1.05rem' }}>
                 Powering businesses with reliable, scalable, and highly efficient electrical infrastructure. We minimize downtime and maximize productivity through expert design and maintenance.
               </p>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem', color: '#ddd' }}>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem', color: 'var(--text-muted)' }}>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Office Build-outs & Renovations</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Data Cabling & Networking</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Security & Access Control Wiring</li>
@@ -67,12 +69,12 @@ const Services = () => {
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', color: 'var(--accent-amber)' }}>
                 <Factory size={32} />
-                <h2 style={{ fontSize: '2rem', color: '#fff' }}>Industrial Power</h2>
+                <h2 style={{ fontSize: '2rem', color: 'var(--text-main)' }}>Industrial Power</h2>
               </div>
               <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '1.05rem' }}>
                 Heavy-duty solutions for demanding environments. We provide robust electrical engineering and installation for manufacturing facilities and warehouses.
               </p>
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem', color: '#ddd' }}>
+              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem', color: 'var(--text-muted)' }}>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> High-Voltage Installations</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Motor Controls & Automation</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Transformer Upgrades</li>
@@ -82,7 +84,8 @@ const Services = () => {
                 <Link to="/contact" className="btn-secondary">Book Industrial Service</Link>
               </div>
             </div>
-            <div style={{ borderRadius: '12px', overflow: 'hidden', minHeight: '300px', backgroundImage: 'url(https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=2000&auto=format&fit=crop)', backgroundSize: 'cover', backgroundPosition: 'center', border: '1px solid var(--border-glass)' }}>
+            <div className="image-wrapper" style={{ display: 'flex', minHeight: '300px' }}>
+              <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=2000&auto=format&fit=crop" alt="Industrial Power" />
             </div>
           </div>
         </div>
