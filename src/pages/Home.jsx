@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Shield, Zap, Wrench, CheckCircle, Clock, Award, Star, Heart, ArrowRight } from 'lucide-react';
+import Gallery from '../components/Gallery';
 
 const Home = () => {
   const canvasRef = useRef(null);
@@ -340,7 +341,12 @@ const Home = () => {
             rgba(10,10,12,${0.1 + scrollProgress * 0.6}) 40%,
             rgba(10,10,12,${0.4 + scrollProgress * 0.6}) 100%)`,
           zIndex: 1,
-        }} />
+          overflow: 'hidden'
+        }}>
+          {/* Animated Background Orbs */}
+          <div style={{ position: 'absolute', top: '15%', left: '10%', width: '30vw', height: '30vw', background: 'radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%)', filter: 'blur(60px)', animation: 'pulse-glow 8s ease-in-out infinite alternate' }} />
+          <div style={{ position: 'absolute', bottom: '10%', right: '5%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%)', filter: 'blur(80px)', animation: 'pulse-glow 12s ease-in-out infinite alternate-reverse' }} />
+        </div>
         
         {/* z-index: 10 — all text content sits ON TOP */}
         <div style={{ position: 'relative', height: '100vh', zIndex: 10 }}>
@@ -397,18 +403,17 @@ const Home = () => {
       {/* ===== MAIN CONTENT ===== */}
       <div style={{ position: 'relative', zIndex: 10, backgroundColor: 'var(--bg-dark)' }}>
         
-        {/* Trust Row - High Converting */}
+        {/* Premium Trust Row */}
         <div className="container scroll-fade-up" style={{ marginTop: '-40px', position: 'relative', zIndex: 20 }}>
-          <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'center', gap: '3rem', flexWrap: 'wrap', backgroundColor: '#ffffff', boxShadow: '0 10px 40px rgba(0,0,0,0.08)', borderRadius: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#111827' }}>
-              <span style={{ fontSize: '1.2rem' }}>🏆</span> 500+ Projects Completed
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#111827' }}>
-              <span style={{ fontSize: '1.2rem' }}>⭐</span> 4.9★ Google Rating
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#111827' }}>
-              <span style={{ fontSize: '1.2rem' }}>⏱️</span> 15+ Years Experience
-            </div>
+          <div className="glass-panel" style={{ padding: '2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.5rem', backgroundColor: 'var(--bg-card)', borderRadius: '24px', boxShadow: 'var(--shadow-premium)' }}>
+            {[
+              'Licensed & Insured', 'Emergency Service', '100% Guaranteed', 
+              'Background Checked', 'Financing Available', 'Local Business'
+            ].map((trust, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 600, color: 'var(--text-main)', fontSize: '0.95rem' }}>
+                <CheckCircle size={20} color="var(--accent-amber)" /> {trust}
+              </div>
+            ))}
           </div>
         </div>
         <section className="section container">
@@ -543,22 +548,35 @@ const Home = () => {
 
         <section className="section" style={{ backgroundColor: 'rgba(245, 158, 11, 0.03)', borderTop: '1px solid var(--border-glass)', borderBottom: '1px solid var(--border-glass)' }}>
           <div className="container">
-            <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <Gallery />
+            
+            <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '4rem', marginTop: '4rem' }}>
               <p style={{ color: 'var(--accent-amber)', fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>Testimonials</p>
               <h2 className="responsive-heading">What Our <span className="text-accent">Clients</span> Say</h2>
             </div>
-            <div className="testimonials-grid">
+            <div className="testimonials-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
               {[
-                { initials: 'JR', name: 'Jessica R.', role: 'Homeowner, Nutley, NJ', quote: '"Heath Electricians saved the day when our power went out in a storm. The tech arrived within 2 hours and fixed everything quickly. Highly recommend!"' },
-                { initials: 'CM', name: 'Carlos M.', role: 'Homeowner, Jersey City', quote: '"Professional, on-time, and affordable. They replaced our old fuse box with a modern panel in one day. Outstanding work!"' },
-                { initials: 'PS', name: 'Priya S.', role: 'Business Owner, Hoboken', quote: '"Five stars! The team installed LED lighting in my store and even gave me tips to reduce my energy bill. Very knowledgeable!"' },
+                { img: 'https://randomuser.me/api/portraits/women/44.jpg', name: 'Jessica R.', role: 'Homeowner, Nutley, NJ', quote: '"Heath Electricians saved the day when our power went out in a storm. The tech arrived within 2 hours and fixed everything quickly. Highly recommend!"', service: 'Emergency Repair' },
+                { img: 'https://randomuser.me/api/portraits/men/32.jpg', name: 'Carlos M.', role: 'Homeowner, Jersey City', quote: '"Professional, on-time, and affordable. They replaced our old fuse box with a modern panel in one day. Outstanding work!"', service: 'Panel Upgrade' },
+                { img: 'https://randomuser.me/api/portraits/women/68.jpg', name: 'Priya S.', role: 'Business Owner, Hoboken', quote: '"Five stars! The team installed LED lighting in my store and even gave me tips to reduce my energy bill. Very knowledgeable!"', service: 'Commercial Lighting' },
               ].map((t, i) => (
-                <div key={i} className={`glass-panel scroll-fade-up stagger-${i + 1}`} style={{ padding: '2rem' }}>
-                  <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem' }}>{[1,2,3,4,5].map(s => <Star key={s} size={18} fill="var(--accent-amber)" color="var(--accent-amber)" />)}</div>
-                  <p style={{ color: '#ddd', fontStyle: 'italic', marginBottom: '1.5rem', lineHeight: 1.8 }}>{t.quote}</p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <div className="avatar">{t.initials}</div>
-                    <div><p style={{ fontWeight: 600, fontSize: '0.95rem' }}>{t.name}</p><p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t.role}</p></div>
+                <div key={i} className={`premium-card scroll-fade-up stagger-${i + 1}`} style={{ padding: '2.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                    <div style={{ display: 'flex', gap: '4px' }}>{[1,2,3,4,5].map(s => <Star key={s} size={18} fill="var(--accent-amber)" color="var(--accent-amber)" />)}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.2)', padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-amber)' }}>
+                       Google Review
+                    </div>
+                  </div>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', fontStyle: 'italic', marginBottom: '2rem', lineHeight: 1.8 }}>{t.quote}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid var(--border-glass)', paddingTop: '1.5rem' }}>
+                    <img src={t.img} alt={t.name} style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-main)' }}>{t.name} <span style={{ color: 'var(--accent-amber)' }}>✓</span></p>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{t.role}</p>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: '1rem', display: 'inline-block', background: 'rgba(0,0,0,0.03)', color: 'var(--text-main)', padding: '0.25rem 0.75rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600 }}>
+                    Service: {t.service}
                   </div>
                 </div>
               ))}
