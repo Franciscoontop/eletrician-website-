@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Zap, Menu, X } from 'lucide-react';
+import { Zap, Menu, X, Phone } from 'lucide-react';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -34,7 +34,7 @@ const Navbar = () => {
       <div className="container nav-container">
         <a href="/" onClick={handleHomeClick} className="nav-logo">
           <Zap size={28} />
-          <span>Lumina</span> Electrical
+          <span>Heath</span> Electricians
         </a>
 
         {/* Mobile hamburger */}
@@ -50,7 +50,21 @@ const Navbar = () => {
           <a href="/" onClick={handleHomeClick} className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>Home</a>
           <Link to="/services" className={`nav-link ${location.pathname === '/services' ? 'active' : ''}`}>Services</Link>
           <Link to="/contact" className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}>Contact</Link>
+          <div className="nav-cta-wrapper">
+            <a href="tel:1-800-HEATH-NJ" className="nav-phone">📞 1-800-HEATH-NJ</a>
+            <Link to="/contact" className="btn-primary btn-sm" onClick={() => setMobileOpen(false)}>Book Service</Link>
+          </div>
         </div>
+      </div>
+      
+      {/* Mobile Fixed Bottom CTA */}
+      <div className="mobile-fixed-cta">
+        <a href="tel:1-800-HEATH-NJ" className="mobile-call-btn">
+          <Phone size={20} /> Call Now
+        </a>
+        <Link to="/contact" className="mobile-book-btn">
+          Book Service
+        </Link>
       </div>
     </nav>
   );

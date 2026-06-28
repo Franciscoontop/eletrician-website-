@@ -5,6 +5,7 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     propertyType: 'residential',
     service: 'panel_upgrade',
     message: ''
@@ -18,7 +19,7 @@ const Contact = () => {
     e.preventDefault();
     // Simulate form submission
     alert('Thank you for reaching out! We will contact you shortly.');
-    setFormData({ name: '', email: '', propertyType: 'residential', service: 'panel_upgrade', message: '' });
+    setFormData({ name: '', email: '', phone: '', propertyType: 'residential', service: 'panel_upgrade', message: '' });
   };
 
   return (
@@ -43,7 +44,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 style={{ fontSize: '1.1rem', marginBottom: '0.2rem', color: 'var(--text-main)' }}>Call Us</h4>
-                  <p style={{ color: 'var(--text-muted)' }}>1-800-LUMINA-E</p>
+                  <p style={{ color: 'var(--text-muted)' }}><a href="tel:1-800-HEATH-NJ" style={{ color: 'inherit', textDecoration: 'none' }}>1-800-HEATH-NJ</a></p>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Mon-Fri: 8am - 6pm</p>
                 </div>
               </div>
@@ -54,7 +55,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h4 style={{ fontSize: '1.1rem', marginBottom: '0.2rem', color: 'var(--text-main)' }}>Email Us</h4>
-                  <p style={{ color: 'var(--text-muted)' }}>info@luminaelectrical.com</p>
+                  <p style={{ color: 'var(--text-muted)' }}>info@heathelectricians.com</p>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>24/7 online support</p>
                 </div>
               </div>
@@ -66,7 +67,7 @@ const Contact = () => {
                 <div>
                   <h4 style={{ fontSize: '1.1rem', marginBottom: '0.2rem', color: 'var(--text-main)' }}>Visit Us</h4>
                   <p style={{ color: 'var(--text-muted)' }}>123 Power Avenue,</p>
-                  <p style={{ color: 'var(--text-muted)' }}>Spark City, SC 90210</p>
+                  <p style={{ color: 'var(--text-muted)' }}>Newark, NJ</p>
                 </div>
               </div>
             </div>
@@ -107,6 +108,20 @@ const Contact = () => {
               </div>
               <div className="contact-form-row">
                 <div className="form-group">
+                  <label className="form-label" htmlFor="phone">Phone Number</label>
+                  <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone" 
+                    className="form-input" 
+                    value={formData.phone} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+
+                <div className="form-group">
                   <label className="form-label" htmlFor="propertyType">Property Type</label>
                   <select 
                     id="propertyType" 
@@ -121,25 +136,25 @@ const Contact = () => {
                     <option value="industrial">Industrial</option>
                   </select>
                 </div>
+              </div>
 
-                <div className="form-group">
-                  <label className="form-label" htmlFor="service">Service Needed</label>
-                  <select 
-                    id="service" 
-                    name="service" 
-                    className="form-input" 
-                    value={formData.service} 
-                    onChange={handleChange}
-                    style={{ appearance: 'none', backgroundColor: '#fff', color: '#111827' }}
-                  >
-                    <option value="panel_upgrade">Panel Upgrade</option>
-                    <option value="emergency">Emergency Repair</option>
-                    <option value="lighting">Lighting Installation</option>
-                    <option value="rewiring">Full/Partial Rewiring</option>
-                    <option value="ev_charger">EV Charger Installation</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
+              <div className="form-group">
+                <label className="form-label" htmlFor="service">Service Needed</label>
+                <select 
+                  id="service" 
+                  name="service" 
+                  className="form-input" 
+                  value={formData.service} 
+                  onChange={handleChange}
+                  style={{ appearance: 'none', backgroundColor: '#fff', color: '#111827' }}
+                >
+                  <option value="panel_upgrade">Panel Upgrade</option>
+                  <option value="emergency">Emergency Repair</option>
+                  <option value="lighting">Lighting Installation</option>
+                  <option value="rewiring">Full/Partial Rewiring</option>
+                  <option value="ev_charger">EV Charger Installation</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
 
               <div className="form-group">

@@ -659,6 +659,28 @@ textarea.form-input {
   gap: 1.5rem;
 }
 
+/* Nav CTA Wrapper (Desktop) */
+.nav-cta-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-left: 2rem;
+}
+.nav-phone {
+  font-weight: 700;
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 1rem;
+}
+.btn-sm {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+}
+
+.mobile-fixed-cta {
+  display: none;
+}
+
 /* Mobile Menu Button */
 .mobile-menu-btn {
   display: none;
@@ -706,6 +728,40 @@ textarea.form-input {
   }
   .nav-link {
     font-size: 1.5rem;
+  }
+  
+  .nav-cta-wrapper {
+    margin-left: 0;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .mobile-fixed-cta {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #ffffff;
+    border-top: 1px solid var(--border-glass);
+    z-index: 2000;
+  }
+  .mobile-call-btn, .mobile-book-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.25rem 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    color: #111827;
+  }
+  .mobile-book-btn {
+    background: var(--accent-amber);
   }
 
   .hero-title {

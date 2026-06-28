@@ -19,38 +19,38 @@ const Services = () => {
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', color: 'var(--accent-amber)' }}>
                 <HomeIcon size={32} />
-                <h2 style={{ fontSize: '2rem', color: 'var(--text-main)' }}>Residential Solutions</h2>
+                <h2 style={{ fontSize: '2rem', color: 'var(--text-main)' }}>Residential Services</h2>
               </div>
               <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '1.05rem' }}>
-                Transform your home with cutting-edge electrical setups. We specialize in smart home integration, custom lighting designs, breaker panel upgrades, and seamless rewiring to keep your sanctuary safe and stunning.
+                Upgrade to a 200-Amp panel for more power and safety. We'll replace outdated panels so you never trip a breaker again. Safe, code-compliant setups for your entire home.
               </p>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem', color: 'var(--text-muted)' }}>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Custom LED Lighting Design</li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Smart Home Automation Integration</li>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Panel Upgrades & Replacements</li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> EV Charger Installation</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Level 2 EV Charger Installation</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Custom LED Lighting Design</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Smart Home Automation</li>
               </ul>
               <div>
                 <Link to="/contact" className="btn-secondary">Book Residential Service</Link>
               </div>
             </div>
             <div className="image-wrapper" style={{ display: 'flex', minHeight: '300px' }}>
-              <img src="/residential.png" alt="Residential Services" />
+              <img src="/residential.png" alt="Before and after of electrical panel replacement" />
             </div>
           </div>
 
           {/* Commercial */}
           <div className="glass-panel service-page-grid">
             <div className="image-wrapper" style={{ display: 'flex', minHeight: '300px' }}>
-              <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2000&auto=format&fit=crop" alt="Commercial Systems" />
+              <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2000&auto=format&fit=crop" alt="Electrician wiring a commercial office" />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', color: 'var(--accent-amber)' }}>
                 <Cpu size={32} />
-                <h2 style={{ fontSize: '2rem', color: 'var(--text-main)' }}>Commercial Systems</h2>
+                <h2 style={{ fontSize: '2rem', color: 'var(--text-main)' }}>Commercial Wiring</h2>
               </div>
               <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '1.05rem' }}>
-                Powering businesses with reliable, scalable, and highly efficient electrical infrastructure. We minimize downtime and maximize productivity through expert design and maintenance.
+                Expert wiring for offices and retail: lighting retrofits, data cabling, and backup power solutions. Fully licensed for all NJ commercial codes to minimize downtime and maximize productivity.
               </p>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem', color: 'var(--text-muted)' }}>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> Office Build-outs & Renovations</li>
@@ -72,7 +72,7 @@ const Services = () => {
                 <h2 style={{ fontSize: '2rem', color: 'var(--text-main)' }}>Industrial Power</h2>
               </div>
               <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '1.05rem' }}>
-                Heavy-duty solutions for demanding environments. We provide robust electrical engineering and installation for manufacturing facilities and warehouses.
+                Heavy-duty solutions for demanding environments. We provide robust electrical engineering and installation for manufacturing facilities, warehouses, and industrial plants across New Jersey.
               </p>
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem', color: 'var(--text-muted)' }}>
                 <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><ArrowRight size={18} color="var(--accent-amber)"/> High-Voltage Installations</li>
@@ -85,7 +85,7 @@ const Services = () => {
               </div>
             </div>
             <div className="image-wrapper" style={{ display: 'flex', minHeight: '300px' }}>
-              <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=2000&auto=format&fit=crop" alt="Industrial Power" />
+              <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=2000&auto=format&fit=crop" alt="Industrial electrical equipment installation" />
             </div>
           </div>
         </div>

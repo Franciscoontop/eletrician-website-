@@ -346,37 +346,38 @@ const Home = () => {
         <div style={{ position: 'relative', height: '100vh', zIndex: 10 }}>
           
           <div className="hero-content" style={phaseStyle(p1, scrollProgress < 0.2)}>
-            <h1 className="hero-title">
-              <span className="text-gradient">Powering The Future, </span>
-              <span className="text-accent">Brilliantly.</span>
+            <h1 className="hero-title" style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }}>
+              <span className="text-gradient">Licensed Electricians in </span>
+              <span className="text-accent">Newark & North Jersey</span>
             </h1>
-            <p className="hero-subtitle">Premium electrical installations and smart solutions for the modern world.</p>
+            <p className="hero-subtitle">Residential • Commercial • Emergency Service – 24/7 Response. Serving Homeowners Since 2010.</p>
             <div className="hero-buttons">
-              <Link to="/services" className="btn-primary">Explore Services</Link>
-              <Link to="/contact" className="btn-secondary">Get a Quote</Link>
+              <a href="tel:1-800-HEATH-NJ" className="btn-primary">Call Now – 24/7 Service</a>
+              <Link to="/contact" className="btn-secondary">Request Free Estimate</Link>
             </div>
           </div>
 
           <div className="hero-content" style={phaseStyle(p2, false)}>
             <h1 className="hero-title" style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}>
-              <span className="text-gradient">Uncompromising Quality.</span>
+              <span className="text-gradient">Fast. Reliable. </span>
+              <span className="text-accent">Insured.</span>
             </h1>
-            <p className="hero-subtitle" style={{ color: '#fff' }}>We engineer reliable, high-performance energy systems designed to last a lifetime.</p>
+            <p className="hero-subtitle" style={{ color: '#fff' }}>NJ-licensed professionals ready for any emergency, day or night.</p>
           </div>
 
           <div className="hero-content" style={phaseStyle(p3, false)}>
             <h1 className="hero-title" style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}>
-              <span className="text-accent">Smart</span> Home Ready.
+              <span className="text-accent">Residential</span> & Commercial
             </h1>
-            <p className="hero-subtitle" style={{ color: '#fff' }}>Seamless integration with the latest automated technology.</p>
+            <p className="hero-subtitle" style={{ color: '#fff' }}>From panel upgrades to full commercial rewiring, we handle it all.</p>
           </div>
 
           <div className="hero-content" style={phaseStyle(p4, false)}>
             <h1 className="hero-title" style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}>
-              <span className="text-gradient">Industrial Grade </span>
-              <span className="text-accent">Power.</span>
+              <span className="text-gradient">100% Satisfaction </span>
+              <span className="text-accent">Guaranteed.</span>
             </h1>
-            <p className="hero-subtitle" style={{ color: '#fff' }}>The backbone your business needs to thrive.</p>
+            <p className="hero-subtitle" style={{ color: '#fff' }}>We don't leave until the job is done right. NJ License #NJ12345.</p>
           </div>
 
           {/* Scroll hint — z-index: 10 on top of everything */}
@@ -400,19 +401,19 @@ const Home = () => {
         <div className="container scroll-fade-up" style={{ marginTop: '-40px', position: 'relative', zIndex: 20 }}>
           <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'center', gap: '3rem', flexWrap: 'wrap', backgroundColor: '#ffffff', boxShadow: '0 10px 40px rgba(0,0,0,0.08)', borderRadius: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#111827' }}>
-              <span style={{ fontSize: '1.2rem' }}>⚡</span> 24/7 Emergency Dispatch
+              <span style={{ fontSize: '1.2rem' }}>🏆</span> 500+ Projects Completed
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#111827' }}>
-              <span style={{ fontSize: '1.2rem' }}>🛡️</span> 100% Licensed & Insured
+              <span style={{ fontSize: '1.2rem' }}>⭐</span> 4.9★ Google Rating
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, color: '#111827' }}>
-              <span style={{ fontSize: '1.2rem' }}>📋</span> NEC & OSHA Code Compliant
+              <span style={{ fontSize: '1.2rem' }}>⏱️</span> 15+ Years Experience
             </div>
           </div>
         </div>
         <section className="section container">
           <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <h2 className="responsive-heading">Why Choose <span className="text-accent">Lumina</span></h2>
+            <h2 className="responsive-heading">Why Choose <span className="text-accent">Heath</span></h2>
             <p style={{ color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto' }}>We bring light to the darkest corners with state-of-the-art technology and master craftsmanship.</p>
           </div>
           <div className="services-grid">
@@ -462,7 +463,7 @@ const Home = () => {
               <p style={{ color: 'var(--accent-amber)', fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>Our Story</p>
               <h2 className="responsive-heading" style={{ marginBottom: '1.5rem', lineHeight: 1.2 }}>Built on <span className="text-accent">Trust</span>, Powered by <span className="text-gradient">Innovation</span></h2>
               <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.8 }}>
-                Founded in 2009, Lumina Electrical started with a single van and a simple mission: deliver electrical work so reliable and beautifully executed that it speaks for itself. Over 15 years, we've grown into one of the most trusted contractors in the region.
+                Founded in 2010, Heath Electricians started with a single van and a simple mission: deliver electrical work so reliable and beautifully executed that it speaks for itself. Over 15 years, we've grown into one of the most trusted contractors in New Jersey.
               </p>
               <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', lineHeight: 1.8 }}>
                 Every wire we run, every panel we install, and every circuit we design reflects our unwavering commitment to excellence. We don't cut corners—we illuminate them.
@@ -530,7 +531,7 @@ const Home = () => {
               { icon: <Clock size={24} />, title: '1. Consultation', desc: 'We evaluate your needs and provide a transparent, upfront estimate.' },
               { icon: <Wrench size={24} />, title: '2. Execution', desc: 'Our experts perform the work with precision and minimal disruption.' },
               { icon: <CheckCircle size={24} />, title: '3. Inspection', desc: 'Rigorous testing to ensure everything meets the highest standards.' },
-              { icon: <Award size={24} />, title: '4. Guarantee', desc: 'Backed by our ironclad Lumina performance guarantee.' },
+              { icon: <Award size={24} />, title: '4. Guarantee', desc: 'Backed by our ironclad Heath performance guarantee.' },
             ].map((step, i) => (
               <div key={i} className={`glass-panel scroll-fade-up stagger-${i + 1}`} style={{ padding: '2rem', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
                 <div className="process-icon">{step.icon}</div>
@@ -548,9 +549,9 @@ const Home = () => {
             </div>
             <div className="testimonials-grid">
               {[
-                { initials: 'MR', name: 'Michael R.', role: 'Homeowner, Residential Rewire', quote: '"Lumina completely rewired our 1960s home and installed a smart panel. The team was incredibly professional and the work was flawless."' },
-                { initials: 'SL', name: 'Sarah L.', role: 'Restaurant Owner, Commercial', quote: '"We needed a full electrical build-out in just three weeks. Lumina delivered ahead of schedule with zero issues during inspection."' },
-                { initials: 'DK', name: 'David K.', role: 'Operations Manager, Industrial', quote: '"Outstanding work on our warehouse high-voltage installation. Their attention to safety protocols is second to none."' },
+                { initials: 'JR', name: 'Jessica R.', role: 'Homeowner, Nutley, NJ', quote: '"Heath Electricians saved the day when our power went out in a storm. The tech arrived within 2 hours and fixed everything quickly. Highly recommend!"' },
+                { initials: 'CM', name: 'Carlos M.', role: 'Homeowner, Jersey City', quote: '"Professional, on-time, and affordable. They replaced our old fuse box with a modern panel in one day. Outstanding work!"' },
+                { initials: 'PS', name: 'Priya S.', role: 'Business Owner, Hoboken', quote: '"Five stars! The team installed LED lighting in my store and even gave me tips to reduce my energy bill. Very knowledgeable!"' },
               ].map((t, i) => (
                 <div key={i} className={`glass-panel scroll-fade-up stagger-${i + 1}`} style={{ padding: '2rem' }}>
                   <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem' }}>{[1,2,3,4,5].map(s => <Star key={s} size={18} fill="var(--accent-amber)" color="var(--accent-amber)" />)}</div>
@@ -571,6 +572,26 @@ const Home = () => {
           <div className="image-banner-content">
             <h2 className="responsive-heading">Built for <span className="text-accent">Industrial</span> Scale</h2>
             <p>Heavy-duty power distribution and high-voltage installations.</p>
+          </div>
+        </section>
+        
+        <section className="section container">
+          <div className="scroll-fade-up" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <p style={{ color: 'var(--accent-amber)', fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '0.75rem' }}>Common Questions</p>
+            <h2 className="responsive-heading">Frequently Asked <span className="text-accent">Questions</span></h2>
+          </div>
+          <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {[
+              { q: 'Do you offer emergency service 24/7?', a: 'Yes. We have electricians on call 24/7 for urgent issues like outages or sparking. We typically dispatch same day.' },
+              { q: 'Are you fully licensed in New Jersey?', a: 'Absolutely – our license # is NJ12345. We follow all state electrical codes and provide permits and inspection paperwork.' },
+              { q: 'How much does a panel upgrade cost?', a: 'It varies, but most upgrades start around $2,500 for a 200-Amp panel (parts & labor). We give firm estimates after an on-site inspection.' },
+              { q: 'What areas do you serve?', a: 'We serve all of New Jersey, including Newark, Jersey City, Paterson, and surrounding towns. Give us a call, we’ll come to you!' }
+            ].map((faq, i) => (
+              <div key={i} className={`glass-panel scroll-fade-up stagger-${i + 1}`} style={{ padding: '1.5rem 2rem' }}>
+                <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: '#fff' }}>{faq.q}</h4>
+                <p style={{ color: 'var(--text-muted)', lineHeight: 1.6 }}>{faq.a}</p>
+              </div>
+            ))}
           </div>
         </section>
         
