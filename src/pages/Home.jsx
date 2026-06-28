@@ -131,10 +131,20 @@ const Home = () => {
     return () => { cancelled = true; };
   }, [drawFrame, isVideoFallback]);
 
-  // ===== RESET ON HOME/LOGO CLICK =====
+  // ===== RESET ON HOME/LOGO CLICK OR REFRESH =====
   useEffect(() => {
+    // Prevent browser from auto-restoring scroll position which breaks the lock
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+
     document.body.style.overflow = 'hidden';
-    window.scrollTo(0, 0);
+    
+    // Tiny timeout ensures we override the browser's native scroll restoration
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 10);
+
     setIsAnimFinished(false);
     setScrollProgress(0);
     targetProgress.current = 0;
@@ -143,7 +153,12 @@ const Home = () => {
     if (framesRef.current.length > 0) drawFrame(0);
     if (videoRef.current) videoRef.current.currentTime = 0;
 
-    return () => { document.body.style.overflow = 'auto'; };
+    return () => { 
+      document.body.style.overflow = 'auto'; 
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'auto';
+      }
+    };
   }, [location.state, drawFrame]);
 
   // Lock/unlock body
