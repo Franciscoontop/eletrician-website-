@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Maximize2 } from 'lucide-react';
 
 const projects = [
-  { id: 1, title: 'Luxury Smart Home Integration', category: 'Residential', img: 'https://images.unsplash.com/photo-1558002038-1055907df827?q=80&w=2000&auto=format&fit=crop' },
-  { id: 2, title: 'Corporate Office Build-out', category: 'Commercial', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2000&auto=format&fit=crop' },
-  { id: 3, title: 'High-Voltage Panel Upgrade', category: 'Industrial', img: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2000&auto=format&fit=crop' },
-  { id: 4, title: 'Boutique Lighting Retrofit', category: 'Commercial', img: 'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?q=80&w=2000&auto=format&fit=crop' },
-  { id: 5, title: 'EV Charging Station Setup', category: 'Residential', img: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?q=80&w=2000&auto=format&fit=crop' },
-  { id: 6, title: 'Warehouse Automation Wiring', category: 'Industrial', img: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=2000&auto=format&fit=crop' },
+  { id: 1, title: 'Luxury Smart Home Integration', category: 'Residential', img: '/jackmac34.jpg' },
+  { id: 2, title: 'Corporate Office Build-out', category: 'Commercial', img: '/jarmoluk.jpg' },
+  { id: 3, title: 'High-Voltage Panel Upgrade', category: 'Industrial', img: '/jillrose.jpg' },
+  { id: 4, title: 'Boutique Lighting Retrofit', category: 'Commercial', img: '/new-lightbulb.webp' },
+  { id: 5, title: 'EV Charging Station Setup', category: 'Residential', img: '/jackmac34.jpg' },
+  { id: 6, title: 'Warehouse Automation Wiring', category: 'Industrial', img: '/jillrose.jpg' },
 ];
 
 const Gallery = () => {

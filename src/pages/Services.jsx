@@ -35,14 +35,14 @@ const Services = () => {
               </div>
             </div>
             <div className="image-wrapper gallery-item" style={{ display: 'flex', minHeight: '400px', borderRadius: '16px', overflow: 'hidden' }}>
-              <img src="/residential.png" alt="Before and after of electrical panel replacement" className="gallery-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }} />
+              <img src="/jackmac34.jpg" alt="Electrician at residential property" className="gallery-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }} />
             </div>
           </div>
 
           {/* Commercial */}
           <div className="premium-card service-page-grid" style={{ padding: '3rem', alignItems: 'center' }}>
             <div className="image-wrapper gallery-item" style={{ display: 'flex', minHeight: '400px', borderRadius: '16px', overflow: 'hidden' }}>
-              <img src="https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=2000&auto=format&fit=crop" alt="Electrician wiring a commercial office" className="gallery-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }} />
+              <img src="/jarmoluk.jpg" alt="Electrician wiring a commercial office" className="gallery-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', color: 'var(--accent-amber)' }}>
@@ -85,7 +85,7 @@ const Services = () => {
               </div>
             </div>
             <div className="image-wrapper gallery-item" style={{ display: 'flex', minHeight: '400px', borderRadius: '16px', overflow: 'hidden' }}>
-              <img src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=2000&auto=format&fit=crop" alt="Industrial electrical equipment installation" className="gallery-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }} />
+              <img src="/jillrose.jpg" alt="Industrial electrical equipment installation" className="gallery-img" style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }} />
             </div>
           </div>
         </div>

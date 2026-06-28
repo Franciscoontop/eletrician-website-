@@ -313,13 +313,10 @@ const Home = () => {
           }}
         />
 
-        {/* z-index: 0 — fallback video for mobile Safari */}
-        <video
-          ref={videoRef}
-          src={window.innerWidth < 768 ? "/new png 720x12980 light bulb.mp4" : "/new destktop light bulb aniamtion.mp4"}
-          muted
-          playsInline
-          preload="auto"
+        {/* z-index: 0 — fallback image for mobile/performance */}
+        <img
+          src="/new-lightbulb.webp"
+          alt="Glowing lightbulb"
           style={{
             position: 'absolute',
             top: 0,
@@ -506,11 +503,11 @@ const Home = () => {
         <section className="section container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
             <div style={{ position: 'relative', width: '100%', paddingBottom: '3rem', paddingRight: '2rem' }}>
-              <div className="image-wrapper scroll-scale-in" style={{ width: '85%', zIndex: 1 }}>
-                <img src="/smart-home.png" alt="Smart home interior lighting" style={{ aspectRatio: '4/5' }} />
+              <div className="image-wrapper scroll-scale-in" style={{ width: '85%', zIndex: 1, borderRadius: '16px', overflow: 'hidden' }}>
+                <img src="/jillrose.jpg" alt="Electric meter installation" style={{ aspectRatio: '4/5', objectFit: 'cover', width: '100%' }} />
               </div>
-              <div className="image-wrapper scroll-fade-up" style={{ width: '55%', position: 'absolute', bottom: 0, right: 0, zIndex: 2, padding: '4px' }}>
-                <img src="/electrician-panel.png" alt="Electrician detail" style={{ aspectRatio: '1/1' }} />
+              <div className="image-wrapper scroll-fade-up" style={{ width: '55%', position: 'absolute', bottom: 0, right: 0, zIndex: 2, padding: '4px', borderRadius: '16px', overflow: 'hidden' }}>
+                <img src="/jackmac34.jpg" alt="Electrician detail" style={{ aspectRatio: '1/1', objectFit: 'cover', width: '100%' }} />
               </div>
             </div>
             <div className="scroll-fade-left">
@@ -584,8 +581,8 @@ const Home = () => {
           </div>
         </section>
 
-        <section className="image-banner scroll-scale-in">
-          <img src="/industrial-power.png" alt="Industrial power systems" />
+        <section className="image-banner scroll-scale-in" style={{ position: 'relative' }}>
+          <img src="/jarmoluk.jpg" alt="Industrial power systems" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           <div className="image-banner-overlay"></div>
           <div className="image-banner-content">
             <h2 className="responsive-heading">Built for <span className="text-accent">Industrial</span> Scale</h2>
