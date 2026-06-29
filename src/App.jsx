@@ -10,7 +10,7 @@ function App() {
   return (
     <Router>
       <Navbar />
-      <main>
+      <main style={{ backgroundColor: '#F9F8F6' }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/services" element={<Services />} />

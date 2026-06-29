@@ -298,6 +298,7 @@ const Home = () => {
       {/* ===== FULL-SCREEN SCROLL-LOCKED HERO ===== */}
       <section
         ref={containerRef}
+        className="!bg-[#121212]"
         style={{
           position: 'relative',
           width: '100vw',
@@ -305,7 +306,7 @@ const Home = () => {
           margin: 0,
           padding: 0,
           overflow: 'hidden',
-          backgroundColor: '#000',
+          backgroundColor: '#121212',
         }}
       >
         {/* z-index: 0 — background canvas */}
@@ -343,9 +344,9 @@ const Home = () => {
         <div style={{
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
           background: `linear-gradient(180deg, 
-            rgba(10,10,12,${0.3 + scrollProgress * 0.7}) 0%, 
-            rgba(10,10,12,${0.1 + scrollProgress * 0.6}) 40%,
-            rgba(10,10,12,${0.4 + scrollProgress * 0.6}) 100%)`,
+            rgba(18,18,18,${0.3 + scrollProgress * 0.7}) 0%, 
+            rgba(18,18,18,${0.1 + scrollProgress * 0.6}) 40%,
+            rgba(18,18,18,${0.4 + scrollProgress * 0.6}) 100%)`,
           zIndex: 1,
           overflow: 'hidden'
         }}>
@@ -407,7 +408,7 @@ const Home = () => {
       </section>
 
       {/* ===== MAIN CONTENT ===== */}
-      <div style={{ position: 'relative', zIndex: 10, backgroundColor: pageScrolled ? 'transparent' : 'var(--bg-dark)', transition: 'background-color 0.8s ease' }}>
+      <div className="!bg-[#F9F8F6]" style={{ position: 'relative', zIndex: 10, backgroundColor: pageScrolled ? '#F9F8F6' : '#121212', transition: 'background-color 0.8s ease' }}>
         
         {/* Premium Trust Row */}
         <div className="container scroll-fade-up" style={{ marginTop: '-40px', position: 'relative', zIndex: 20 }}>
@@ -449,10 +450,10 @@ const Home = () => {
         <section className="section container">
           <div className="image-wrapper scroll-scale-in" style={{ height: '50vh', minHeight: '400px' }}>
             <img src="/electrician-panel.png" alt="Electrician working on panel" />
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(180deg, rgba(17,24,39,0.7) 0%, rgba(17,24,39,0.3) 50%, rgba(17,24,39,0.8) 100%)', zIndex: 1 }}></div>
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(180deg, rgba(18,18,18,0.7) 0%, rgba(18,18,18,0.3) 50%, rgba(18,18,18,0.8) 100%)', zIndex: 1 }}></div>
             <div className="image-banner-content" style={{ zIndex: 2 }}>
               <h2 className="responsive-heading" style={{ color: 'var(--text-light)' }}>Precision in <span className="text-accent">Every Connection</span></h2>
-              <p style={{ color: '#e5e7eb' }}>Our team brings decades of experience to every project, no matter the scale.</p>
+              <p style={{ color: 'var(--text-light)' }}>Our team brings decades of experience to every project, no matter the scale.</p>
             </div>
           </div>
         </section>
