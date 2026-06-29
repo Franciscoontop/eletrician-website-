@@ -67,8 +67,8 @@ const Gallery = () => {
             }}>
               <div className="gallery-content" style={{ transform: 'translateY(20px)', transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)' }}>
                 <span style={{ color: 'var(--accent-amber)', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>{project.category}</span>
-                <h3 style={{ color: '#fff', fontSize: '1.25rem', marginTop: '0.5rem', marginBottom: '1rem' }}>{project.title}</h3>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: '#fff', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 500 }}>
+                <h3 style={{ color: 'var(--text-light)', fontSize: '1.25rem', marginTop: '0.5rem', marginBottom: '1rem' }}>{project.title}</h3>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-light)', fontSize: '0.9rem', cursor: 'pointer', fontWeight: 500 }}>
                   View Project <Maximize2 size={16} />
                 </div>
               </div>

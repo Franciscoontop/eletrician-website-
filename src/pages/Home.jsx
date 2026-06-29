@@ -10,10 +10,19 @@ const Home = () => {
   
   const [isAnimFinished, setIsAnimFinished] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [pageScrolled, setPageScrolled] = useState(false);
   const [framesReady, setFramesReady] = useState(false);
   const [isVideoFallback, setIsVideoFallback] = useState(() => {
     return window.innerWidth < 768 || typeof window.ImageDecoder === 'undefined';
   });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setPageScrolled(window.scrollY > window.innerHeight * 0.5);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const targetProgress = useRef(0);
   const currentProgress = useRef(0);
@@ -365,14 +374,14 @@ const Home = () => {
               <span className="text-gradient">Fast. Reliable. </span>
               <span className="text-accent">Insured.</span>
             </h1>
-            <p className="hero-subtitle" style={{ color: '#fff' }}>NJ-licensed professionals ready for any emergency, day or night.</p>
+            <p className="hero-subtitle" style={{ color: 'var(--text-light)' }}>NJ-licensed professionals ready for any emergency, day or night.</p>
           </div>
 
           <div className="hero-content" style={phaseStyle(p3, false)}>
             <h1 className="hero-title" style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}>
               <span className="text-accent">Residential</span> & Commercial
             </h1>
-            <p className="hero-subtitle" style={{ color: '#fff' }}>From panel upgrades to full commercial rewiring, we handle it all.</p>
+            <p className="hero-subtitle" style={{ color: 'var(--text-light)' }}>From panel upgrades to full commercial rewiring, we handle it all.</p>
           </div>
 
           <div className="hero-content" style={phaseStyle(p4, false)}>
@@ -380,14 +389,14 @@ const Home = () => {
               <span className="text-gradient">100% Satisfaction </span>
               <span className="text-accent">Guaranteed.</span>
             </h1>
-            <p className="hero-subtitle" style={{ color: '#fff' }}>We don't leave until the job is done right. NJ License #NJ12345.</p>
+            <p className="hero-subtitle" style={{ color: 'var(--text-light)' }}>We don't leave until the job is done right. NJ License #NJ12345.</p>
           </div>
 
           {/* Scroll hint — z-index: 10 on top of everything */}
           <div style={{
             position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
             opacity: scrollProgress < 0.05 ? 1 : 0, transition: 'opacity 0.5s ease',
-            textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', zIndex: 10,
+            textAlign: 'center', color: 'var(--text-light)', fontSize: '0.85rem', zIndex: 10,
           }}>
             <div style={{ width: '24px', height: '40px', border: '2px solid rgba(255,255,255,0.3)', borderRadius: '12px', margin: '0 auto 0.5rem', position: 'relative' }}>
               <div style={{ width: '4px', height: '8px', backgroundColor: 'var(--accent-amber)', borderRadius: '2px', position: 'absolute', top: '6px', left: '50%', transform: 'translateX(-50%)', animation: 'pulse 2s ease-in-out infinite' }} />
@@ -398,7 +407,7 @@ const Home = () => {
       </section>
 
       {/* ===== MAIN CONTENT ===== */}
-      <div style={{ position: 'relative', zIndex: 10, backgroundColor: 'var(--bg-dark)' }}>
+      <div style={{ position: 'relative', zIndex: 10, backgroundColor: pageScrolled ? 'transparent' : 'var(--bg-dark)', transition: 'background-color 0.8s ease' }}>
         
         {/* Premium Trust Row */}
         <div className="container scroll-fade-up" style={{ marginTop: '-40px', position: 'relative', zIndex: 20 }}>
@@ -442,7 +451,7 @@ const Home = () => {
             <img src="/electrician-panel.png" alt="Electrician working on panel" />
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'linear-gradient(180deg, rgba(17,24,39,0.7) 0%, rgba(17,24,39,0.3) 50%, rgba(17,24,39,0.8) 100%)', zIndex: 1 }}></div>
             <div className="image-banner-content" style={{ zIndex: 2 }}>
-              <h2 className="responsive-heading" style={{ color: '#fff' }}>Precision in <span className="text-accent">Every Connection</span></h2>
+              <h2 className="responsive-heading" style={{ color: 'var(--text-light)' }}>Precision in <span className="text-accent">Every Connection</span></h2>
               <p style={{ color: '#e5e7eb' }}>Our team brings decades of experience to every project, no matter the scale.</p>
             </div>
           </div>
@@ -484,17 +493,17 @@ const Home = () => {
             <div className="glass-panel scroll-fade-right" style={{ padding: '2rem', background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(10,10,12,0.9) 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2rem' }}>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
                 <Heart size={24} color="var(--accent-amber)" style={{ marginTop: '2px', flexShrink: 0 }} />
-                <div><h4 style={{ color: '#fff', marginBottom: '0.5rem' }}>Our Mission</h4><p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.7 }}>To deliver electrical excellence that enhances safety, comfort, and energy efficiency for every client.</p></div>
+                <div><h4 style={{ color: 'var(--text-light)', marginBottom: '0.5rem' }}>Our Mission</h4><p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.7 }}>To deliver electrical excellence that enhances safety, comfort, and energy efficiency for every client.</p></div>
               </div>
               <div style={{ height: '1px', backgroundColor: 'var(--border-glass)' }}></div>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
                 <Star size={24} color="var(--accent-amber)" style={{ marginTop: '2px', flexShrink: 0 }} />
-                <div><h4 style={{ color: '#fff', marginBottom: '0.5rem' }}>Our Vision</h4><p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.7 }}>To become the gold standard in electrical contracting—where innovation meets integrity.</p></div>
+                <div><h4 style={{ color: 'var(--text-light)', marginBottom: '0.5rem' }}>Our Vision</h4><p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.7 }}>To become the gold standard in electrical contracting—where innovation meets integrity.</p></div>
               </div>
               <div style={{ height: '1px', backgroundColor: 'var(--border-glass)' }}></div>
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
                 <Award size={24} color="var(--accent-amber)" style={{ marginTop: '2px', flexShrink: 0 }} />
-                <div><h4 style={{ color: '#fff', marginBottom: '0.5rem' }}>Our Promise</h4><p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.7 }}>Every project backed by our lifetime craftsmanship guarantee. No questions asked.</p></div>
+                <div><h4 style={{ color: 'var(--text-light)', marginBottom: '0.5rem' }}>Our Promise</h4><p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.7 }}>Every project backed by our lifetime craftsmanship guarantee. No questions asked.</p></div>
               </div>
             </div>
           </div>
@@ -603,7 +612,7 @@ const Home = () => {
               { q: 'What areas do you serve?', a: 'We serve all of New Jersey, including Newark, Jersey City, Paterson, and surrounding towns. Give us a call, we’ll come to you!' }
             ].map((faq, i) => (
               <div key={i} className={`glass-panel scroll-fade-up stagger-${i + 1}`} style={{ padding: '1.5rem 2rem' }}>
-                <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: '#fff' }}>{faq.q}</h4>
+                <h4 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-light)' }}>{faq.q}</h4>
                 <p style={{ color: 'var(--text-muted)', lineHeight: 1.6 }}>{faq.a}</p>
               </div>
             ))}
